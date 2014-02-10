@@ -104,23 +104,21 @@ AtariScreen.prototype.Display = function () {
     var x = 0;
     var y = 0;
     var word_length = 16 - 1;
-    var i, j, k, l, start_plane, mask, pixel_colour;
+    var i, j, k, l, start_plane, pixel_colour;
     // Set up a temporary buffer for the plane data for a 16 pixel area
     var plane_data = new Array(planes);
     // Now we start going through the screen buffer (array of words)
     for (i = 0; i < length; i++) {
         start_plane = (i * planes);
         // Get the planar data for a 16 pixel length of screen
-        for (k = 0; k < planes; k++) {
+        for (k = 0; k < planes; k++) 
             plane_data[k] = this.screen_memory[start_plane + k];
-        }
         // Now we have the plane data for a 16 pixel area, start
         // iterating over each of the 16 pixels.
         for (j = word_length; j > -1; --j) { // Starting with the last plane, the HSB of the colour value of the pixel, and going downwards...
             pixel_colour = 0;                    // Initialise pixel colour value
-            mask = 1 << j;                       // Set which pixel to mask
             for (l = 0; l < planes; l++)         // Iterate over each of the planes
-                if (plane_data[l] & mask)        // If the masked pixel exists in plane data
+                if (plane_data[l] & (1 << j))    // If the masked pixel exists in plane data
                     pixel_colour += 1 << l;      // Add the plane's binary digit value to the pixel colour value
             if (pixel_colour > 0) {              // If the result is not the background colour...
                 context.fillStyle = this.canvas_palette[pixel_colour]; // Set the pixel colour...
@@ -142,9 +140,8 @@ AtariScreen.prototype.Display = function () {
 AtariScreen.prototype.SetPalette = function(newpalette) {
     this.palette = newpalette;
     this.canvas_palette = new Array(newpalette.length);
-    for (var i = 0; i < newpalette.length; i++) {
+    for (var i = 0; i < newpalette.length; i++) 
         this.SetPaletteValue(i, newpalette[i]);
-    }
 };
 
 /* Convert ST(E) colour register value to HTML5 colour value.
@@ -195,11 +192,11 @@ AtariScreen.prototype.ExtractDegasElite = function (data) {
     this.SetMode(mode_data & 0x00FF);           // Set ST(E) graphics mode.
     this.ExtractPalette(dv, 2);                 // Extract palette information
     var position;
-    if ((mode_data & 0x8000) > 0) {                     // Detect if compressed 
+    if ((mode_data & 0x8000) > 0)                       // Detect if compressed 
         position = this.ExtractRLEData(dv, 34);         // If .PC? file
-    } else {
+    else 
         position = this.ExtractPlanarScreen(dv, 34);    // If .PI? file
-    }
+    
     // Degas Elite files differ from earlier Degas files in that they have a list of 4 colour cycling
     // definitions at the end, so now this is checked for. Note that there's no implementation of
     // the colour cycling in this code- that's up to you!
