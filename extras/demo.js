@@ -33,6 +33,7 @@ function load_file(evt) {
     reader.onload = (function (theFile) {
         return function (e) {
             // File is now in ArrayBuffer in "reader.result"
+            testScreen.scale = (document.getElementById('autoscale').checked);
             testScreen.ExtractDegasElite(reader.result);
             testScreen.Display();
         };

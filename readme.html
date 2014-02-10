@@ -9,8 +9,17 @@
         <div id="header">
             <h1>AtariScreen</h1>
             <p><strong>A Javascript and HTML5 library for emulating the bit plane screen of an Atari 16/24 bit computer.</strong></p>
-            <p><em>Current version: <strong>v0.1 (2014-02-06)</strong></em></p>
+            <p><em>Current version: <strong>v0.2 (2014-02-10)</strong></em></p>
         </div>
+        <h2>Updates</h2>
+        <h3>v0.2 (2014-02-10)</h3>
+        <ul>
+            <li>Much more optimised screen display</li>
+            <li>Scaling is now optional</li>
+            <li>Added "autoscale" as a option in the constructor.</li>
+            <li>Added "scale" property</li>
+        </ul>
+        <hr/>
         <h2>Introduction</h2>
         <p><strong>AtariScreen</strong> implements an HTML5 emulation of the bit plane based video modes of Atari computers from the ST onwards. It is designed to be used when you want to emulate some aspect of an Atari screen that cannot otherwise be easily emulated on the HTML Canvas.</p>
         <h3>Bitmaps and planes</h3>
@@ -232,7 +241,7 @@
             <li>Emulates 3 planar bitmap graphics modes on Atari ST computers</li>
             <li>Emulates ST colour palette registers, and is compatible with STE colour values.</li>
             <li>Processes Degas Elite .P?? images into screen buffer.</li>
-            <li>Automatically scales according to graphics mode.</li>
+            <li>Can automatically scale according to graphics mode.</li>
         </ul>
         <hr />
         <h2>Files</h2>
@@ -262,12 +271,13 @@
         </p>
         <hr />
         <h2>Constructor</h2>
-        <h3>AtariScreen(mode, element, name)</h3>
+        <h3>AtariScreen(mode, element, name, [autoscale])</h3>
         <p>Create an AtariScreen object, and attach to an element in the webpage.</p>
         <ul>
             <li>mode = ST(E) graphics mode (integer 0-2)</li>
             <li>element = HTML element to attach canvas to</li>
             <li>name = ID name of object (string)</li>
+            <li>autoscale (optional) = Set whether the AtariScreen object is scaled according to the type of screen (default is true)</li>
         </ul>
         <hr />
         <h2>Methods</h2>
@@ -336,6 +346,8 @@
         <p>The width of the AtariScreen.</p>
         <h3>height</h3>
         <p>The height of the AtariScreen.</p>
+        <h3>scale</h3>
+        <p>Whether to automatically scale the AtariScreen image or not.</p>
         <h3>scaleX</h3>
         <p>The X scaling of the AtariScreen.</p>
         <h3>scaleY</h3>
@@ -354,6 +366,7 @@
         <h2>Demo</h2>
         <p><em>(Source code <a href="extras/demo.js" target="_blank">here</a>.)</em></p>
         <p>Select an Atari picture file (.P??) to view in the AtariScreen below.</p>
+        <p><input type="checkbox" checked="checked" id="autoscale"/> Autoscale image?</p>
         <input type="file" id="files" name="files[]" />
         <div id="test"></div>
     </body>

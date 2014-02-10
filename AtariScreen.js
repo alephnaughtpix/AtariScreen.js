@@ -1,4 +1,4 @@
-﻿/* AtariScreen v0.1 (2014-02-06)
+﻿/* AtariScreen v0.2 (2014-02-10)
  *
  * Emulate bit plane screen on an Atari 16/24 bit computer.
  *
@@ -22,11 +22,13 @@
  * element = HTML element to attach canvas to
  * name = ID name of object (string)
  */
-function AtariScreen(mode, element, name) {
+function AtariScreen(mode, element, name, autoscale) {
+    if (autoscale === undefined) autoscale = true;
     this.canvas = element.appendChild(document.createElement('canvas'));
     this.canvas.id = name;
     this.canvas.width = 640;
     this.canvas.height = 400;
+    this.scale = autoscale;
     this.screen_memory = new Uint16Array(16000);
     this.cycles = new Array();
     this.mode = this.SetMode(mode);
@@ -91,28 +93,33 @@ AtariScreen.prototype.SetMode = function(newmode) {
  * image onto the canvas according to the colour register values.
  */
 AtariScreen.prototype.Display = function () {
-    // Get the canvas and fill out with the background colour.
+    // Get the canvas set up
     var context = this.canvas.getContext('2d');
-    context.setTransform(1, 0, 0, 1, 0, 0);     // Reset scaling
-    context.scale(this.scaleX, this.scaleY);    // Set scaling to the ST(E) graphics mode
-    context.fillStyle = this.canvas_palette[0];
-    context.fillRect(0, 0, this.width, this.height);
+    if (this.scale) {                       // If we're doing autoscaling
+        this.canvas.width = 640;                    // make sure canvas is full size 
+        this.canvas.height = 400;
+        context.setTransform(1, 0, 0, 1, 0, 0);     // Reset scaling
+        context.scale(this.scaleX, this.scaleY);    // Set scaling to the ST(E) graphics mode
+        context.imageSmoothingEnabled = false;      // Switch off interpolation
+    } else {
+        this.canvas.width = this.width;             // Otherwise set canvas to actual screen dimensions
+        this.canvas.height = this.height;
+    }
+    var canvasData = context.createImageData(this.width, this.height);
     // Now initialise the variables need for our calculations
     var planes = this.planes;
     var length = (this.screen_memory.length / planes);
-    var width = this.width;
-    var x = 0;
-    var y = 0;
+    var memory_pointer = 0;
+    var start_plane = 0;
     var word_length = 16 - 1;
-    var i, j, k, l, start_plane, pixel_colour;
+    var i, j, k, l , pixel_colour;
     // Set up a temporary buffer for the plane data for a 16 pixel area
     var plane_data = new Array(planes);
     // Now we start going through the screen buffer (array of words)
     for (i = 0; i < length; i++) {
-        start_plane = (i * planes);
         // Get the planar data for a 16 pixel length of screen
-        for (k = 0; k < planes; k++) 
-            plane_data[k] = this.screen_memory[start_plane + k];
+        for (k = 0; k < planes; k++)
+            plane_data[k] = this.screen_memory[start_plane++];
         // Now we have the plane data for a 16 pixel area, start
         // iterating over each of the 16 pixels.
         for (j = word_length; j > -1; --j) { // Starting with the last plane, the HSB of the colour value of the pixel, and going downwards...
@@ -120,26 +127,25 @@ AtariScreen.prototype.Display = function () {
             for (l = 0; l < planes; l++)         // Iterate over each of the planes
                 if (plane_data[l] & (1 << j))    // If the masked pixel exists in plane data
                     pixel_colour += 1 << l;      // Add the plane's binary digit value to the pixel colour value
-            if (pixel_colour > 0) {              // If the result is not the background colour...
-                context.fillStyle = this.canvas_palette[pixel_colour]; // Set the pixel colour...
-                context.fillRect(x, y, 1, 1);                          // ... And plot it
-            }
-            x++;               // Go onto the next pixel.
-            if (x >= width) {  // If we are at the end of the row, reset to the next row
-                x = 0;
-                y++;
-            }
+            canvasData.data[memory_pointer++] = this.pixel_palette[pixel_colour][0];    // Copy RGB of pixel to canvas memory
+            canvasData.data[memory_pointer++] = this.pixel_palette[pixel_colour][1];
+            canvasData.data[memory_pointer++] = this.pixel_palette[pixel_colour][2];
+            canvasData.data[memory_pointer++] = 255;    // Pixel is fully opaque
         }
     }
+    context.putImageData(canvasData, 0, 0);
+    if (this.scale)
+        context.drawImage(this.canvas, 0, 0);
 };
 
 /* Set palette range
- * 
- * newpalette = array of palette values
- */
+* 
+* newpalette = array of palette values
+*/
 AtariScreen.prototype.SetPalette = function(newpalette) {
     this.palette = newpalette;
     this.canvas_palette = new Array(newpalette.length);
+    this.pixel_palette = new Array(newpalette.length);
     for (var i = 0; i < newpalette.length; i++) 
         this.SetPaletteValue(i, newpalette[i]);
 };
@@ -173,6 +179,8 @@ AtariScreen.prototype.SetPaletteValue = function(colour, value) {
     var blue = (((value & 7) << 1) + ((value & 8) >> 3)).toString(16);
     // Convert components to "#RRGGBB" value
     this.canvas_palette[colour] = '#' + red + red + green + green + blue + blue;
+    // Add to pixel RGB palette for createImage display method
+    this.pixel_palette[colour] = [parseInt(red + red, 16), parseInt(green + green, 16), parseInt(blue + blue, 16)];
 };
 
 /* Extract Degas Elite file to AtariScreen object
