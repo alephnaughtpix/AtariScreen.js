@@ -30,11 +30,11 @@ Usage
 
 Include AtariScreen in the <head> element of your web page:
 
-  <script src="AtariScreen.mini.js" language="Javascript" type="text/javascript"></script>
+  <script src=&quot;AtariScreen.mini.js&quot; language=&quot;Javascript&quot; type=&quot;text/javascript&quot;></script>
 
 In your javascript code, instantiate an AtariScreen object, passing in the screen mode, an HTML element to attach the screen to, and an ID name for the object.
 
-  // Locate "<div id="demo_placeholder" ...> element in web page
+  // Locate "<div id=&quot;demo_placeholder&quot; ...> element in web page
   var element = document.getElementById('demo_placeholder');
   // Add an ST mode 0 screen called 'demo' to it.
   demoScreen = new AtariScreen(0, element, 'demo');
