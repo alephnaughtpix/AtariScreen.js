@@ -1,0 +1,360 @@
+<html>
+    <head>
+        <title>Test</title>
+        <link rel="stylesheet" type="text/css" href="extras/main.css" />
+        <script src="AtariScreen.mini.js" language="Javascript" type="text/javascript" ></script>
+        <script src="extras/demo.js" language="Javascript" type="text/javascript" ></script>
+    </head>
+    <body onload="initTest();">
+        <div id="header">
+            <h1>AtariScreen</h1>
+            <p><strong>A Javascript and HTML5 library for emulating the bit plane screen of an Atari 16/24 bit computer.</strong></p>
+            <p><em>Current version: <strong>v0.1 (2014-02-06)</strong></em></p>
+        </div>
+        <h2>Introduction</h2>
+        <p><strong>AtariScreen</strong> implements an HTML5 emulation of the bit plane based video modes of Atari computers from the ST onwards. It is designed to be used when you want to emulate some aspect of an Atari screen that cannot otherwise be easily emulated on the HTML Canvas.</p>
+        <h3>Bitmaps and planes</h3>
+        <p>The screen buffer stored in unsigned word based <em>bitmaps</em> over a number of interleaved <em>planes</em> with the colours defined in a <em>palette</em> register.</p>
+        <p>For example, a 16x1 pixel area of colours 0-15 in ST mode 0 would be stored in screen memory as the following 4 words: <em>21845, 13107, 3855, 255</em>.</p>
+        <p>This translates to:
+            <table cellpadding="5" cellspacing="0" border="1">
+                <tr>
+                    <td></td>
+                    <td>Value</td>
+                    <td colspan="17">Binary equivalent</td>
+                </tr>
+                <tr align="center">
+                    <td align="left"><em>Plane 1</em></td>
+                    <td align="left"><strong>21845</strong></td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td align="left"><em>Bit 1 (LSB)</em></td>
+                </tr>
+                <tr align="center">
+                    <td align="left"><em>Plane 2</em></td>
+                    <td align="left"><strong>13107</strong></td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td align="left"><em>Bit 2</em></td>
+                </tr>
+                <tr align="center">
+                    <td align="left"><em>Plane 3</em></td>
+                    <td align="left"><strong>3855</strong></td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td align="left"><em>Bit 3</em></td>
+                </tr>
+                <tr align="center">
+                    <td align="left"><em>Plane 4</em></td>
+                    <td align="left"><strong>255</strong></td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td align="left"><em>Bit 4 (MSB)</em></td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right"><em>Colour value</em></td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6</td>
+                    <td>7</td>
+                    <td>8</td>
+                    <td>9</td>
+                    <td>10</td>
+                    <td>11</td>
+                    <td>12</td>
+                    <td>13</td>
+                    <td>14</td>
+                    <td>15</td>
+                    <td><em>&lt;- binary result</em></td>
+                </tr>
+            </table>
+        </p>
+        <p>As you can see the number of colours is determined by the number of planes, so ST mode 0 has 2^4 = 16 colours.</p>
+        <h3>Colours</h3>
+        <p>Colours are defined in the palette registers. Normal ST colours are defined by a hexidecimal word value of the format 0xRGB, where R, G and B are from 0-7. For example, 0x700 is red, 0x070 is green, 0x007 is blue, 0x777 is white, etc.</p>
+        <p>From the Atari STE onwards, the R, G, and B values could be 0-0xF. <strong>However</strong>, to maintain compatibility with earlier computers, the least significant bit of the colour value was shifted to the most significant bit in the colour 
+            register( %rRRR would be interpreted as %RRRr, and so on). eg. The darkest grey in the STE palette would <em>not</em> be 0x111 as one 
+            might expect, but <strong>0x888</strong>. Naturally this caused a bit of a headache for Atari coders who wanted to use the extra colour 
+            palette!</p>
+        <p><em>Example: ST mode 0 default palette</em></p>
+        <p>
+            <table cellpadding="5" cellspacing="0" border="1">
+                <tr>
+                    <td><em>Colour</em></td>
+                    <td><em>Value</em></td>
+                    <td><em>Result</em></td>
+                </tr>
+                <tr>
+                    <td align="center">0</td>
+                    <td align="center">0xFFF</td>
+                    <td style="background-color: #ffffff;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">1</td>
+                    <td align="center">0xF00</td>
+                    <td style="background-color: #ff0000;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">2</td>
+                    <td align="center">0x0F0</td>
+                    <td style="background-color: #00ff00;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">3</td>
+                    <td align="center">0xFF0</td>
+                    <td style="background-color: #ffff00;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">4</td>
+                    <td align="center">0x00F</td>
+                    <td style="background-color: #0000ff;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">5</td>
+                    <td align="center">0xF0F</td>
+                    <td style="background-color: #ff00ff;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">6</td>
+                    <td align="center">0x0FF</td>
+                    <td style="background-color: #00ffff;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">7</td>
+                    <td align="center">0x555</td>
+                    <td style="background-color: #AAAAAA;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">8</td>
+                    <td align="center">0x333</td>
+                    <td style="background-color: #666666;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">9</td>
+                    <td align="center">0xF33</td>
+                    <td style="background-color: #ff6666;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">10</td>
+                    <td align="center">0x3F3</td>
+                    <td style="background-color: #66ff66;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">11</td>
+                    <td align="center">0xFF3</td>
+                    <td style="background-color: #ffff66;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">12</td>
+                    <td align="center">0x33F</td>
+                    <td style="background-color: #6666ff;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">13</td>
+                    <td align="center">0xF3F</td>
+                    <td style="background-color: #ff66ff;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">14</td>
+                    <td align="center">0x3FF</td>
+                    <td style="background-color: #66ffff;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td align="center">15</td>
+                    <td align="center">0</td>
+                    <td style="background-color: #000000;">&nbsp;</td>
+                </tr>
+            </table>
+        </p>
+        <hr />
+        <h2>AtariScreen features</h2>
+        <ul>
+            <li>Emulates 3 planar bitmap graphics modes on Atari ST computers</li>
+            <li>Emulates ST colour palette registers, and is compatible with STE colour values.</li>
+            <li>Processes Degas Elite .P?? images into screen buffer.</li>
+            <li>Automatically scales according to graphics mode.</li>
+        </ul>
+        <hr />
+        <h2>Files</h2>
+        <ul>
+            <li><strong>AtariScreen.mini.js</strong> - minified version of AtariScreen. This is best version to use for websites.</li>
+            <li><strong>AtariScreen.js</strong> - the full source code for AtariScreen. Use this if you're wanting to hack around with the code.</li>
+            <li><strong>readme.html</strong> - this file!</li>
+            <li><strong>extras/demo.js</strong> - source code for the demo at the bottom of this page</li>
+            <li><strong>extras/main.css</strong> - CSS file for this page</li>
+            <li><strong>extras/demo_pictures</strong> - various pictures in Degas Elite format for the demo.</li>
+        </ul>
+        <hr />
+        <h2>Usage</h2>
+        <p>Include AtariScreen in the &lt;head&gt; element of your web page:</p>
+        <p class="code">&lt;script src="AtariScreen.mini.js" language="Javascript" type="text/javascript"&gt;&lt;/script&gt;</p>
+        <p>In your javascript code, instantiate an AtariScreen object, passing in the screen mode, an HTML element to attach the screen to, and an ID name for the object.</p>
+        <p class="code">
+            <span class="commented">// Locate "&lt;div id="demo_placeholder" ...&gt; element in web page</span><br/>
+            var element = document.getElementById('demo_placeholder');<br/>
+            <span class="commented">// Add an ST mode 0 screen called 'demo' to it.</span><br/>
+            demoScreen = new AtariScreen(0, element, 'demo');<br/>
+            <br/>
+            <span class="commented">// ... Any screen manipulation goes here ...<br/>
+            <br/>
+            // Display screen.</span><br/>
+            demoScreen.Display();
+        </p>
+        <hr />
+        <h2>Constructor</h2>
+        <h3>AtariScreen(mode, element, name)</h3>
+        <p>Create an AtariScreen object, and attach to an element in the webpage.</p>
+        <ul>
+            <li>mode = ST(E) graphics mode (integer 0-2)</li>
+            <li>element = HTML element to attach canvas to</li>
+            <li>name = ID name of object (string)</li>
+        </ul>
+        <hr />
+        <h2>Methods</h2>
+        <h3>SetMode(newmode)</h3>
+        <p>Set graphics mode of AtariScreen object</p>
+        <ul>
+            <li>mode = ST(E) graphics mode (integer 0-2)</li>
+        </ul>
+        <p>Modes supported are:</p>
+        <ul>
+            <li>0: St low res- 320 x 200, 16 colours</li>
+            <li>1: St med res- 640 x 200, 4 colours</li>
+            <li>2: St hi res- 640 x 400, monochrome</li>
+        </ul>
+        <p>By default, the screen memory is cleared and the default palette for each mode is set.</p>
+        <h3>Display()</h3>
+        <p>Display current AtariScreen buffer according to the stored bitmap data and colour palette.</p>
+        <h3>SetPaletteValue(colour, value)</h3>
+        <p>Set colour palette register.</p>
+        <ul>
+            <li>color = index of colour register</li>
+            <li>value = ST(E) hex colour value (0xRGB)</li>
+        </ul>
+        <h3>SetPalette(newpalette)</h3>
+        <p>Set colour values for a whole palette</p>
+        <ul>
+            <li>newpalette = Uint16Array of palette values</li>
+        </ul>
+        <h3>ExtractDegasElite(data)</h3>
+        <p>Extract Degas Elite data from an ArrayBuffer to AtariScreen object screen memory and palette</p>
+        <ul>
+            <li>data = Degas Elite file in an ArrayBuffer object</li>
+        </ul>
+        <p>This can process any .P?? format Degas Elite file. By default, it sets the graphics mode according to the file header, and sets the screen palette to the values in the picture file. (This will be reflected the next time the "Display" method is called.)</p>
+        <h3>ExtractPalette(dv, position)</h3>
+        <p>Extract a palette from a DataView of an ArrayBuffer, and set the AtariScreen palette accordingly.</p>
+        <ul>
+            <li>dv = DataView of ArrayBuffer containing palette information</li>
+            <li>position = position in ArrayBuffer</li>
+        </ul>
+        <h3>ExtractPlanarScreen(dv, position)</h3>
+        <p>Extract uncompressed planar screen data from a DataView of an ArrayBuffer, to the AtariScreen screen memory.</p>
+        <ul>
+            <li>dv = DataView of ArrayBuffer containing planar screen data</li>
+            <li>position = position in ArrayBuffer</li>
+        </ul>
+        <h3>ExtractRLEData(dv, position)</h3>
+        <p>Extract RLE compressed screen data from a DataView of an ArrayBuffer, to the AtariScreen screen memory. This is the type of compression used in Degas Elite compressed files. It's also used in other files eg the IFF format, from where it originated.</p>
+        <ul>
+            <li>dv = DataView of ArrayBuffer containing compressed bitmap information</li>
+            <li>position = position in ArrayBuffer</li>
+        </ul>
+        <hr />
+        <h2>Properties</h2>
+        <h3>canvas</h3>
+        <p>The HTML5 canvas elemet used by the AtariScreen object</p>
+        <h3>mode</h3>
+        <p>The current screen mode of AtariScreen object</p>
+        <h3>screen_memory</h3>
+        <p>The screen memory of the AtariScreen object, in an array of 16000 Uint16 values</p>
+        <h3>palette</h3>
+        <p>The palette of the AtariScreen.</p>
+        <h3>planes</h3>
+        <p>The number of bitmap planes used.</p>
+        <h3>width</h3>
+        <p>The width of the AtariScreen.</p>
+        <h3>height</h3>
+        <p>The height of the AtariScreen.</p>
+        <h3>scaleX</h3>
+        <p>The X scaling of the AtariScreen.</p>
+        <h3>scaleY</h3>
+        <p>The Y scaling of the AtariScreen.</p>
+        <h3>canvas_palette</h3>
+        <p>The palette of the AtariScreen converted into HTML colour values.</p>
+        <h3>cycles</h3>
+        <p>Colour cycling information. This is an array of up to 4 objects, each with the following properties:</p>
+        <ul>
+            <li><strong>left_colour</strong> - starting colour index of the animation</li>
+            <li><strong>right_colour</strong> - ending colour index of the animation</li>
+            <li><strong>direction</strong> - direction of the animation (0 = left, 1 = off, 2 = right)</li>
+            <li><strong>delay</strong> - delay of the animation in 1/1000ths of second</li>
+        </ul>
+        <hr />
+        <h2>Demo</h2>
+        <p><em>(Source code <a href="extras/demo.js" target="_blank">here</a>.)</em></p>
+        <p>Select an Atari picture file (.P??) to view in the AtariScreen below.</p>
+        <input type="file" id="files" name="files[]" />
+        <div id="test"></div>
+    </body>
+</html>

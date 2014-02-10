@@ -1,0 +1,39 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    background-color: White;
+    color: #111111;
+}
+
+h1, h2 {
+    color: #006400;
+}
+
+h3 {
+    color: #000080;
+}
+
+.code {
+    font-family: Courier, san-serif;
+    margin-left: auto;
+    margin-right: auto;
+    color: #000080;
+    background-color: #ccdfff;
+    border: solid 1px #99afff;
+    padding: 5px;
+}
+
+.code .commented {
+    color: #006400;
+}
+
+#Header 
+{
+    text-align: center;
+    width: 50%;
+    background-color: #ffdead;
+    border: solid 1px #191970;
+    margin-left: auto;
+    margin-right: auto;
+}
