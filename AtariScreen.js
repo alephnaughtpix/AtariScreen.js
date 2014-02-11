@@ -21,6 +21,7 @@
  * mode = ST(E) graphics mode (integer 0-2)
  * element = HTML element to attach canvas to
  * name = ID name of object (string)
+ * autoscale (optional) = whether to automatically scale the screen to the canvas
  */
 function AtariScreen(mode, element, name, autoscale) {
     if (autoscale === undefined) autoscale = true;
@@ -146,6 +147,7 @@ AtariScreen.prototype.SetPalette = function(newpalette) {
     this.palette = newpalette;
     this.canvas_palette = new Array(newpalette.length);
     this.pixel_palette = new Array(newpalette.length);
+    this.restore_palette = new Array(newpalette.length);
     for (var i = 0; i < newpalette.length; i++) 
         this.SetPaletteValue(i, newpalette[i]);
 };
@@ -214,7 +216,7 @@ AtariScreen.prototype.ExtractDegasElite = function (data) {
             var colour_animation = new Object();            // Create the animation object
             colour_animation.left_colour  = dv.getUint16(position + (i * 2));       // Left (start) colour
             colour_animation.right_colour = dv.getUint16(position + (i * 2) + 8);   // Right (end) colour
-            colour_animation.direction = dv.getUint16(position + (i * 2) + 16);     // Direction (0=<, 1=off, 2=>)
+            colour_animation.direction = dv.getUint16(position + (i * 2) + 16) - 1; // Direction (-1=<, 0=off, 1=>)
             // Animation delay- this is a bit funny as it's expressed as 128 *minus* the delay
             // (128 is the maximum value), and it's expressed in 1/60ths of a second. (Remember this was a
             // picture format developed by a US company for the Atari platform, so their monitors would have a 60Hz 
@@ -330,3 +332,58 @@ AtariScreen.prototype.ExtractRLEData = function (dv, position) {
     }
     return position;    // Return length of compressed data
 };
+
+AtariScreen.prototype.StartCycle = function(cycle_id) {
+    var success = false;
+    if ((cycle_id >= 0) && (cycle_id <= 3)) {
+        if (this.cycles[cycle_id].direction != 0) {
+            this.restore_palette = this.pixel_palette;
+            this.cycles[cycle_id].position = 0;
+            this.cycles[cycle_id].length = this.cycles[cycle_id].right_colour - this.cycles[cycle_id].left_colour;
+            this.cycles[cycle_id].anim = setTimeout(function() { this.GetNextCycle(cycle_id); }, this.cycles[cycle_id].delay);
+            this.cycles[cycle_id].on = true;
+            success = true;
+        }
+    }
+    return success;
+};
+
+AtariScreen.prototype.GetNextCycle = function (cycle_id) {
+    var success = false;
+    if ((cycle_id >= 0) && (cycle_id <= 3)) {
+        if (this.cycles[cycle_id].on) {
+            var left_start = this.cycles[cycle_id].left_colour;
+            var loop_position = this.cycles[cycle_id].right_colour;
+            this.cycles[cycle_id].position += this.cycles[cycle_id].direction;
+            if (this.cycles[cycle_id].position > this.cycles[cycle_id].right_colour)
+                this.cycles[cycle_id].position = this.cycles[cycle_id].left_colour;
+            if (this.cycles[cycle_id].position < this.cycles[cycle_id].left_colour)
+                this.cycles[cycle_id].position = this.cycles[cycle_id].right_colour;
+            var length = this.cycles[cycle_id].length;
+            var current_position = left_start + this.cycles[cycle_id].position;
+            for (var i = 0; i < length; i++) {
+                if (current_position > loop_position)
+                    current_position = left_start;
+                this.pixel_palette[left_start][0] = this.restore_palette[current_position][0];
+                this.pixel_palette[left_start][1] = this.restore_palette[current_position][1];
+                this.pixel_palette[left_start++][2] = this.restore_palette[current_position++][2];
+            }
+            success = true;
+        }
+    }
+    return success;
+};
+
+AtariScreen.prototype.StopCycle = function (cycle_id) {
+    var success = false;
+    if ((cycle_id >= 0) && (cycle_id <= 3)) {
+        if (this.cycles[cycle_id].on) {
+            clearTimeout(this.cycles[cycle_id].anim);
+            this.cycles[cycle_id].on = false;
+            this.pixel_palette = this.restore_palette;
+            success = true;
+        }
+    }
+    return success;
+};
+

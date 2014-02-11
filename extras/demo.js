@@ -36,6 +36,10 @@ function load_file(evt) {
             testScreen.scale = (document.getElementById('autoscale').checked);
             testScreen.ExtractDegasElite(reader.result);
             testScreen.Display();
+            testScreen.StartCycle(0);
+            testScreen.GetNextCycle(0);
+            testScreen.Display();
+            testScreen.StopCycle(0);
         };
     })(f);
     reader.readAsArrayBuffer(f);
