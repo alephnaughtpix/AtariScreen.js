@@ -1,4 +1,4 @@
-﻿/* AtariScreen v0.2 (2014-02-10)
+﻿/* AtariScreen v0.3 (2014-02-30)
  *
  * Emulate bit plane screen on an Atari 16/24 bit computer.
  *
@@ -31,6 +31,7 @@ function AtariScreen(mode, element, name, autoscale) {
     this.canvas.height = 400;
     this.scale = autoscale;
     this.screen_memory = new Uint16Array(16000);
+    this.ready = true;
     this.cycles = new Array();
     this.mode = this.SetMode(mode);
 }
@@ -94,49 +95,54 @@ AtariScreen.prototype.SetMode = function(newmode) {
  * image onto the canvas according to the colour register values.
  */
 AtariScreen.prototype.Display = function () {
-    // Get the canvas set up
-    var context = this.canvas.getContext('2d');
-    if (this.scale) {                       // If we're doing autoscaling
-        this.canvas.width = 640;                    // make sure canvas is full size 
-        this.canvas.height = 400;
-        context.setTransform(1, 0, 0, 1, 0, 0);     // Reset scaling
-        context.scale(this.scaleX, this.scaleY);    // Set scaling to the ST(E) graphics mode
-        context.imageSmoothingEnabled = false;      // Switch off interpolation
-    } else {
-        this.canvas.width = this.width;             // Otherwise set canvas to actual screen dimensions
-        this.canvas.height = this.height;
-    }
-    var canvasData = context.createImageData(this.width, this.height);
-    // Now initialise the variables need for our calculations
-    var planes = this.planes;
-    var length = (this.screen_memory.length / planes);
-    var memory_pointer = 0;
-    var start_plane = 0;
-    var word_length = 16 - 1;
-    var i, j, k, l , pixel_colour;
-    // Set up a temporary buffer for the plane data for a 16 pixel area
-    var plane_data = new Array(planes);
-    // Now we start going through the screen buffer (array of words)
-    for (i = 0; i < length; i++) {
-        // Get the planar data for a 16 pixel length of screen
-        for (k = 0; k < planes; k++)
-            plane_data[k] = this.screen_memory[start_plane++];
-        // Now we have the plane data for a 16 pixel area, start
-        // iterating over each of the 16 pixels.
-        for (j = word_length; j > -1; --j) { // Starting with the last plane, the HSB of the colour value of the pixel, and going downwards...
-            pixel_colour = 0;                    // Initialise pixel colour value
-            for (l = 0; l < planes; l++)         // Iterate over each of the planes
-                if (plane_data[l] & (1 << j))    // If the masked pixel exists in plane data
-                    pixel_colour += 1 << l;      // Add the plane's binary digit value to the pixel colour value
-            canvasData.data[memory_pointer++] = this.pixel_palette[pixel_colour][0];    // Copy RGB of pixel to canvas memory
-            canvasData.data[memory_pointer++] = this.pixel_palette[pixel_colour][1];
-            canvasData.data[memory_pointer++] = this.pixel_palette[pixel_colour][2];
-            canvasData.data[memory_pointer++] = 255;    // Pixel is fully opaque
-        }
-    }
-    context.putImageData(canvasData, 0, 0);
-    if (this.scale)
-        context.drawImage(this.canvas, 0, 0);
+	if (this.ready) {
+		this.ready = false;
+    	// Get the canvas set up
+    	var context = this.canvas.getContext('2d');
+    	if (this.scale) {                       // If we're doing autoscaling
+        	this.canvas.width = 640;                    // make sure canvas is full size 
+        	this.canvas.height = 400;
+        	context.setTransform(1, 0, 0, 1, 0, 0);     // Reset scaling
+        	context.scale(this.scaleX, this.scaleY);    // Set scaling to the ST(E) graphics mode
+        	context.imageSmoothingEnabled = false;      // Switch off interpolation
+    	} else {
+        	this.canvas.width = this.width;             // Otherwise set canvas to actual screen dimensions
+        	this.canvas.height = this.height;
+    	}
+    	var canvasData = context.createImageData(this.width, this.height);
+    	// Now initialise the variables need for our calculations
+    	var planes = this.planes;
+    	var length = (this.screen_memory.length / planes);
+    	var memory_pointer = 0;
+    	var start_plane = 0;
+    	var word_length = 16 - 1;
+    	var i, j, k, l , pixel_colour;
+    	// Set up a temporary buffer for the plane data for a 16 pixel area
+    	var plane_data = new Array(planes);
+    	// Now we start going through the screen buffer (array of words)
+    	for (i = 0; i < length; i++) {
+        	// Get the planar data for a 16 pixel length of screen
+        	for (k = 0; k < planes; k++)
+            	plane_data[k] = this.screen_memory[start_plane++];
+        	// Now we have the plane data for a 16 pixel area, start
+        	// iterating over each of the 16 pixels.
+        	for (j = word_length; j > -1; --j) { // Starting with the last plane, the HSB of the colour value of the pixel, and going downwards...
+            	pixel_colour = 0;                    // Initialise pixel colour value
+            	for (l = 0; l < planes; l++)         // Iterate over each of the planes
+                	if (plane_data[l] & (1 << j))    // If the masked pixel exists in plane data
+                    	pixel_colour += 1 << l;      // Add the plane's binary digit value to the pixel colour value
+            	canvasData.data[memory_pointer++] = this.pixel_palette[pixel_colour][0];    // Copy RGB of pixel to canvas memory
+            	canvasData.data[memory_pointer++] = this.pixel_palette[pixel_colour][1];
+            	canvasData.data[memory_pointer++] = this.pixel_palette[pixel_colour][2];
+            	canvasData.data[memory_pointer++] = 255;    // Pixel is fully opaque
+        	}
+    	}
+    	context.putImageData(canvasData, 0, 0);
+    	if (this.scale)
+	        context.drawImage(this.canvas, 0, 0);
+		this.ready = true;
+	}
+	return this.ready;
 };
 
 /* Set palette range
@@ -333,57 +339,135 @@ AtariScreen.prototype.ExtractRLEData = function (dv, position) {
     return position;    // Return length of compressed data
 };
 
-AtariScreen.prototype.StartCycle = function(cycle_id) {
+
+
+/* Initialise colour cycling
+* 
+* cycle_id = index of colour cycling animation (0-3)
+* start_animation (optional) = true if starting animation interrupt (default is false)
+* Returns true if successful
+*/
+
+AtariScreen.prototype.StartCycle = function (cycle_id, start_animation) {
+    if (start_animation === undefined) start_animation = false; // default = false
     var success = false;
-    if ((cycle_id >= 0) && (cycle_id <= 3)) {
-        if (this.cycles[cycle_id].direction != 0) {
-            this.restore_palette = this.pixel_palette;
-            this.cycles[cycle_id].position = 0;
-            this.cycles[cycle_id].length = this.cycles[cycle_id].right_colour - this.cycles[cycle_id].left_colour;
-            this.cycles[cycle_id].anim = setTimeout(function() { this.GetNextCycle(cycle_id); }, this.cycles[cycle_id].delay);
-            this.cycles[cycle_id].on = true;
-            success = true;
+    if ((cycle_id >= 0) && (cycle_id <= 3)) {           // Keep within 0-3
+        var cycle_info = this.cycles[cycle_id];         // Get reference for the colour cycling info    
+        if (cycle_info.direction != 0) {                // Don't bother if there's no direction 
+            var src_palette = this.pixel_palette;      // Get the source palette      
+            var length = src_palette.length;
+            var dest_palette = this.restore_palette = new Array(length); // Create new destination palette to save to
+            for (var i = 0; i < length; i++)            // Back up palette
+                dest_palette[i] = [
+                    src_palette[i][0],
+                    src_palette[i][1],
+                    src_palette[i][2]
+                ];
+            cycle_info.position = 0;                    // Reset position of cycling to start
+            cycle_info.length = (cycle_info.right_colour - cycle_info.left_colour) + 1; // Get length of cycle range
+            cycle_info.on = true;                       // Flag we're ready to start
+            if (start_animation)                        // Start animation interupt if specified
+                this.StartCycleAnimation(cycle_id);
+            success = true;                             // Operation fully successful   
         }
     }
     return success;
 };
+
+/* Execute next step of colour cycling
+* 
+* cycle_id = index of colour cycling animation (0-3)
+* Returns true if successful
+*/
 
 AtariScreen.prototype.GetNextCycle = function (cycle_id) {
     var success = false;
-    if ((cycle_id >= 0) && (cycle_id <= 3)) {
-        if (this.cycles[cycle_id].on) {
-            var left_start = this.cycles[cycle_id].left_colour;
-            var loop_position = this.cycles[cycle_id].right_colour;
-            this.cycles[cycle_id].position += this.cycles[cycle_id].direction;
-            if (this.cycles[cycle_id].position > this.cycles[cycle_id].right_colour)
-                this.cycles[cycle_id].position = this.cycles[cycle_id].left_colour;
-            if (this.cycles[cycle_id].position < this.cycles[cycle_id].left_colour)
-                this.cycles[cycle_id].position = this.cycles[cycle_id].right_colour;
-            var length = this.cycles[cycle_id].length;
-            var current_position = left_start + this.cycles[cycle_id].position;
+    if ((cycle_id >= 0) && (cycle_id <= 3)) {                       // Keep within 0-3  
+        var cycle_info = this.cycles[cycle_id];                     // Get reference for the colour cycling info      
+        if (cycle_info.on) {                                        // Don't bother if it's not on  
+            var src_palette = this.restore_palette;                 // Get the source palette
+            var dest_palette = this.pixel_palette;                  // Get the display palette
+            var left_reset = cycle_info.left_colour;                // Get left most boundry of cycling
+            var left_start = left_reset;
+            var loop_position = cycle_info.right_colour;            // Get right most boundry of cycling
+            var current_position = cycle_info.position;
+            current_position -= cycle_info.direction;               // Move forward/backward a step in the cycling
+            if (current_position > loop_position)                                   // If too far left or right, move to the other side
+                current_position = left_start;
+            if (current_position < left_start)
+                current_position = loop_position;
+            cycle_info.position = current_position;
+            var length = cycle_info.length; // Get length of cycle
             for (var i = 0; i < length; i++) {
-                if (current_position > loop_position)
-                    current_position = left_start;
-                this.pixel_palette[left_start][0] = this.restore_palette[current_position][0];
-                this.pixel_palette[left_start][1] = this.restore_palette[current_position][1];
-                this.pixel_palette[left_start++][2] = this.restore_palette[current_position++][2];
+                if (current_position > loop_position)               // If we're past the end, go back to the start
+                    current_position = left_reset;
+                dest_palette[left_start++] = [                     // Copy palette entry to the display palette
+                    src_palette[current_position][0],
+                    src_palette[current_position][1],
+                    src_palette[current_position++][2]
+                ];
             }
-            success = true;
+            success = true;                                         // Operation fully successful
         }
     }
     return success;
 };
+
+/* Start animation interrupt for colour cycling
+* 
+* cycle_id = index of colour cycling animation (0-3)
+* Returns animation id if successful, -1 otherwise
+*/
+
+AtariScreen.prototype.StartCycleAnimation = function (cycle_id) {
+    var id = -1;                                            // return value will be -1 if unsuccessful  
+    if ((cycle_id >= 0) && (cycle_id <= 3)) {               // Keep within 0-3
+        var cycle_info = this.cycles[cycle_id];             // Get reference for the colour cycling info
+        if (cycle_info.direction != 0) {                    // Don't bother if there's no direction 
+            id = cycle_info.animationId = setInterval(      // Start animation and save id
+                function (screen) {                     // INTERRUPT FUNCTION: call passes in reference to current AtariScreen object
+                    screen.GetNextCycle(0);             //   Get next colour cycle
+                    requestAnimationFrame(function () { //   Wait for next frame
+                        screen.Display();               //   Display new frame
+                    });
+                },
+                cycle_info.delay,                           // cycle delay
+                this                                        // Pass in current AtariScreen object to interrupt function as a parameter
+            );
+            cycle_info.animating = true;                    // Set animating flag to true
+        }
+    }
+    return id;      // Return back animation id (if successful) or -1 (if not successful)
+};
+
+/* Stop colour cycling
+*
+* If the animation interrupt is running, this will be stopped.
+* 
+* cycle_id = index of colour cycling animation (0-3)
+* Returns true if successful
+*/
 
 AtariScreen.prototype.StopCycle = function (cycle_id) {
     var success = false;
-    if ((cycle_id >= 0) && (cycle_id <= 3)) {
-        if (this.cycles[cycle_id].on) {
-            clearTimeout(this.cycles[cycle_id].anim);
-            this.cycles[cycle_id].on = false;
-            this.pixel_palette = this.restore_palette;
-            success = true;
+    if ((cycle_id >= 0) && (cycle_id <= 3)) {           // return value will be -1 if unsuccessful
+        var cycle_info = this.cycles[cycle_id];         // Get reference for the colour cycling info  
+        if (cycle_info.on) {                            // Don't bother if it's not on
+            if (cycle_info.animating)                   // If the animation interrupt is on, switch it off
+                clearInterval(cycle_info.animationId);
+            cycle_info.animating = false;
+            var src_palette = this.restore_palette;                         // Get the source palette
+            var length = src_palette.length;                                // Restore display palette
+            var dest_palette = this.pixel_palette = new Array(length);      // Get the display palette
+            for (var i = 0; i < length; i++)
+                dest_palette[i] = [
+                    src_palette[i][0],
+                    src_palette[i][1],
+                    src_palette[i][2]
+                ];
+            cycle_info.on = false;
+            success = true;                             // Operation fully successful
         }
     }
     return success;
 };
-
