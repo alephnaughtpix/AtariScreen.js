@@ -2,16 +2,22 @@
     <head>
         <title>AtariScreen.js README</title>
         <link rel="stylesheet" type="text/css" href="extras/main.css" />
-        <script src="AtariScreen.js" language="Javascript" type="text/javascript" ></script>
+        <script src="AtariScreen.mini.js" language="Javascript" type="text/javascript" ></script>
         <script src="extras/demo.js" language="Javascript" type="text/javascript" ></script>
     </head>
     <body onload="initTest();">
         <div id="header">
             <h1>AtariScreen</h1>
             <p><strong>A Javascript and HTML5 library for emulating the bit plane screen of an Atari 16/24 bit computer.</strong></p>
-            <p><em>Current version: <strong>v0.3 (2014-02-20)</strong></em></p>
+            <p><em>Current version: <strong>v0.4 (2014-02-21)</strong></em></p>
         </div>
         <h2>Updates</h2>
+        <h3>v0.4 (2014-02-21)</h3>
+        <ul>
+            <li>Reorganistation of code for stability and optimisation.</li>
+            <li>Some properties have made read-only, and some are no longer accessible.</li>
+            <li>Fixed bug in colour cycling animation.</li>
+        </ul>
         <h3>v0.3 (2014-02-20)</h3>
         <ul>
             <li>Colour cycling animation</li>
@@ -359,28 +365,10 @@
         </ul>
         <hr />
         <h2>Properties</h2>
-        <h3>canvas</h3>
-        <p>The HTML5 canvas element used by the AtariScreen object</p>
-        <h3>mode</h3>
-        <p>The current screen mode of AtariScreen object</p>
         <h3>screen_memory</h3>
         <p>The screen memory of the AtariScreen object, in an array of 16000 Uint16 values</p>
         <h3>palette</h3>
         <p>The palette of the AtariScreen.</p>
-        <h3>planes</h3>
-        <p>The number of bitmap planes used.</p>
-        <h3>width</h3>
-        <p>The width of the AtariScreen.</p>
-        <h3>height</h3>
-        <p>The height of the AtariScreen.</p>
-        <h3>scale</h3>
-        <p>Whether to automatically scale the AtariScreen image or not.</p>
-        <h3>scaleX</h3>
-        <p>The X scaling of the AtariScreen.</p>
-        <h3>scaleY</h3>
-        <p>The Y scaling of the AtariScreen.</p>
-        <h3>canvas_palette</h3>
-        <p>The palette of the AtariScreen converted into HTML colour values.</p>
         <h3>cycles</h3>
         <p>Colour cycling information. This is an array of up to 4 objects, each with the following properties:</p>
         <ul>
@@ -389,6 +377,20 @@
             <li><strong>direction</strong> - direction of the animation (-1 = left, 0 = off, 1 = right)</li>
             <li><strong>delay</strong> - delay of the animation in 1/1000ths of second</li>
         </ul>
+        <h3>canvas</h3>
+        <p><strong>[Read only]</strong> The HTML5 canvas element used by the AtariScreen object</p>
+        <h3>mode</h3>
+        <p><strong>[Read only]</strong> The current screen mode of AtariScreen object</p>
+        <h3>planes</h3>
+        <p><strong>[Read only]</strong> The number of bitmap planes used.</p>
+        <h3>width</h3>
+        <p><strong>[Read only]</strong> The width of the AtariScreen.</p>
+        <h3>height</h3>
+        <p><strong>[Read only]</strong> The height of the AtariScreen.</p>
+        <h3>scale</h3>
+        <p><strong>[Read only]</strong> Whether to automatically scale the AtariScreen image or not.</p>
+        <h3>ready</h3>
+        <p><strong>[Read only]</strong> Whether the screen is ready for drawing or not.</p>
         <hr />
         <h2>Demo</h2>
         <h3>Load and display an ST format picture</h3>

@@ -34,6 +34,11 @@ function initTest() {
             testScreen2.screen_memory[i + 2] = 3855;
             testScreen2.screen_memory[i + 3] = 255;
         }
+        var colour = 0;
+        for (i = 0; i < 16; i++) {
+            testScreen2.SetPaletteValue(i, colour);
+            colour += 0x111;
+        }
         var colour_animation = new Object();            // Create the colour cycling
         colour_animation.left_colour = 0;  
         colour_animation.right_colour = 15;
