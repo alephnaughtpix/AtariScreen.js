@@ -72,12 +72,12 @@ In your javascript code, instantiate an AtariScreen object, passing in the scree
 
 Set graphics mode of AtariScreen object
 
-mode = ST(E) graphics mode (integer 0-2)
-Modes supported are:
+* mode = ST(E) graphics mode (integer 0-2)
+  Modes supported are:
+  +0: St low res- 320 x 200, 16 colours
+  +1: St med res- 640 x 200, 4 colours
+  +2: St hi res- 640 x 400, monochrome
 
-0: St low res- 320 x 200, 16 colours
-1: St med res- 640 x 200, 4 colours
-2: St hi res- 640 x 400, monochrome
 By default, the screen memory is cleared and the default palette for each mode is set.
 
 ###Display()
@@ -88,66 +88,68 @@ Display current AtariScreen buffer according to the stored bitmap data and colou
 
 Set colour palette register.
 
-color = index of colour register
-value = ST(E) hex colour value (0xRGB)
+* color = index of colour register
+* value = ST(E) hex colour value (0xRGB)
 
 ###SetPalette(newpalette)
 
 Set colour values for a whole palette
 
-newpalette = Uint16Array of palette values
+* newpalette = Uint16Array of palette values
 
 ###ExtractDegasElite(data)
 
-###Extract Degas Elite data from an ArrayBuffer to AtariScreen object screen memory and palette
+Extract Degas Elite data from an ArrayBuffer to AtariScreen object screen memory and palette
 
-data = Degas Elite file in an ArrayBuffer object
+* data = Degas Elite file in an ArrayBuffer object
+
 This can process any .P?? format Degas Elite file. By default, it sets the graphics mode according to the file header, and sets the screen palette to the values in the picture file. (This will be reflected the next time the "Display" method is called.)
 
 ###ExtractPalette(dv, position)
 
 Extract a palette from a DataView of an ArrayBuffer, and set the AtariScreen palette accordingly.
 
-dv = DataView of ArrayBuffer containing palette information
-position = position in ArrayBuffer
+* dv = DataView of ArrayBuffer containing palette information
+* position = position in ArrayBuffer
 
 ###ExtractPlanarScreen(dv, position)
 
 Extract uncompressed planar screen data from a DataView of an ArrayBuffer, to the AtariScreen screen memory.
 
-dv = DataView of ArrayBuffer containing planar screen data
-position = position in ArrayBuffer
-ExtractRLEData(dv, position)
+* dv = DataView of ArrayBuffer containing planar screen data
+* position = position in ArrayBuffer
+
+###ExtractRLEData(dv, position)
 
 Extract RLE compressed screen data from a DataView of an ArrayBuffer, to the AtariScreen screen memory. This is the type of compression used in Degas Elite compressed files. It's also used in other files eg the IFF format, from where it originated.
 
-dv = DataView of ArrayBuffer containing compressed bitmap information
-position = position in ArrayBuffer
+* dv = DataView of ArrayBuffer containing compressed bitmap information
+* position = position in ArrayBuffer
 
 ###StartCycle(cycle_index, start_animation)
 
 Initialise colour cycling
 
-cycle_id = index of colour cycling animation (0-3)
-start_animation (optional) = true if starting animation interrupt (default is false)
+* cycle_id = index of colour cycling animation (0-3)
+* start_animation (optional) = true if starting animation interrupt (default is false)
 
 ###StartCycleAnimation(cycle_index)
 
 Start colour cycling animation interrupt
 
-cycle_id = index of colour cycling animation (0-3)
+* cycle_id = index of colour cycling animation (0-3)
 
 ###GetNextCycle(cycle_index)
 
 Execute next step of colour cycling
 
-cycle_id = index of colour cycling animation (0-3)
+* cycle_id = index of colour cycling animation (0-3)
 
 ###StopCycle(cycle_index)
 
 Stop colour cycling. If the animation interrupt is running, this will be stopped.
 
-cycle_id = index of colour cycling animation (0-3)
+* cycle_id = index of colour cycling animation (0-3)
 
 ##Properties
 
@@ -163,36 +165,35 @@ The palette of the AtariScreen.
 
 Colour cycling information. This is an array of up to 4 objects, each with the following properties:
 
-left_colour - starting colour index of the animation
-right_colour - ending colour index of the animation
-direction - direction of the animation (-1 = left, 0 = off, 1 = right)
-delay - delay of the animation in 1/1000ths of second
+* left_colour - starting colour index of the animation
+* right_colour - ending colour index of the animation
+* direction - direction of the animation (-1 = left, 0 = off, 1 = right)
+* delay - delay of the animation in 1/1000ths of second
+###scale
+
+Whether to automatically scale the AtariScreen image or not.
 
 ###canvas
 
-[Read only] The HTML5 canvas element used by the AtariScreen object
+_Read only_ The HTML5 canvas element used by the AtariScreen object
 
 ###mode
 
-[Read only] The current screen mode of AtariScreen object
+_Read only_ The current screen mode of AtariScreen object
 
 ###planes
 
-[Read only] The number of bitmap planes used.
+_Read only_ The number of bitmap planes used.
 
 ###width
 
-[Read only] The width of the AtariScreen.
+_Read only_ The width of the AtariScreen.
 
 ###height
 
-[Read only] The height of the AtariScreen.
-
-###scale
-
-[Read only] Whether to automatically scale the AtariScreen image or not.
+_Read only_ The height of the AtariScreen.
 
 ###ready
 
-[Read only] Whether the screen is ready for drawing or not.
+_Read only_ Whether the screen is ready for drawing or not.
 
