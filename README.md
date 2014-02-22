@@ -61,7 +61,8 @@ emulated on the HTML Canvas.
 Include AtariScreen in the `<head>` element of your web page:
 
   ```javascript
-  <script src="AtariScreen.mini.js" language="Javascript" type="text/javascript"></script>```
+  <script src="AtariScreen.mini.js" language="Javascript" type="text/javascript"></script>
+  ```
 
 In your javascript code, instantiate an AtariScreen object, passing in the screen mode, an HTML element to attach the screen to, and an ID name for the object.
 
@@ -74,7 +75,8 @@ In your javascript code, instantiate an AtariScreen object, passing in the scree
   // ... Any screen manipulation goes here ...
 
   // Display screen.
-  demoScreen.Display();```
+  demoScreen.Display();
+  ```
   
 ---
 
