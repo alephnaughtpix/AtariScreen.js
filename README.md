@@ -2,9 +2,13 @@
 
 ##A Javascript and HTML5 library for emulating the bit plane screen of an Atari 16/24 bit computer.
 
-###Current version: v0.4 (2014-02-21)
+###Current version: v0.42 (2014-02-22)
 
 ##Updates
+
+###v0.42 (2014-02-22)
+
+* Various bugfixes.
 
 ###v0.4 (2014-02-21)
 
@@ -24,6 +28,8 @@
 * Added "autoscale" as a option in the constructor.
 * Added "scale" property
 
+---
+
 ##Introduction
 
 AtariScreen implements an HTML5 emulation of the bit plane based video modes of Atari computers from the ST onwards. 
@@ -40,31 +46,37 @@ emulated on the HTML Canvas.
 
 ##Files
 
-* AtariScreen.mini.js - minified version of AtariScreen. This is best version to use for websites.
-* AtariScreen.js - the full source code for AtariScreen. Use this if you're wanting to hack around with the code.
-* readme.html - this file!
-* extras/demo.js - source code for the demo at the bottom of this page
-* extras/main.css - CSS file for this page
-* extras/demo_pictures - various pictures in Degas Elite format for the demo.
+* `AtariScreen.mini.js` - minified version of AtariScreen. This is best version to use for websites.
+* `AtariScreen.js` - the full source code for AtariScreen. Use this if you're wanting to hack around with the code.
+* `readme.html` - this file!
+* `extras/demo.js` - source code for the demo at the bottom of this page
+* `extras/main.css` - CSS file for this page
+* `extras/demo_pictures` - various pictures in Degas Elite format for the demo.
+* `extras/cycle_demo` - Degas Elite format pictures with colour cycling information for the demo.
+
+---
 
 ##Usage
 
-Include AtariScreen in the <head> element of your web page:
+Include AtariScreen in the `<head>` element of your web page:
 
-  `<script src="AtariScreen.mini.js" language="Javascript" type="text/javascript"></script>`
+  ```javascript
+  <script src="AtariScreen.mini.js" language="Javascript" type="text/javascript"></script>```
 
 In your javascript code, instantiate an AtariScreen object, passing in the screen mode, an HTML element to attach the screen to, and an ID name for the object.
 
-  `// Locate "<div id="demo_placeholder" ...>" element in web page`
-  `var element = document.getElementById('demo_placeholder');`
-  `// Add an ST mode 0 screen called 'demo' to it.`
-  `demoScreen = new AtariScreen(0, element, 'demo');`
+  ```javascript
+  // Locate "<div id="demo_placeholder" ...>" element in web page
+  var element = document.getElementById('demo_placeholder');
+  // Add an ST mode 0 screen called 'demo' to it.
+  demoScreen = new AtariScreen(0, element, 'demo');
 
-  `// ... Any screen manipulation goes here ...`
+  // ... Any screen manipulation goes here ...
 
-  `// Display screen.`
-  `demoScreen.Display();`
+  // Display screen.
+  demoScreen.Display();```
   
+---
 
 ##Methods
 
@@ -74,9 +86,9 @@ Set graphics mode of AtariScreen object
 
 * mode = ST(E) graphics mode (integer 0-2)
   Modes supported are:
-  +0: St low res- 320 x 200, 16 colours
-  +1: St med res- 640 x 200, 4 colours
-  +2: St hi res- 640 x 400, monochrome
+  * 0: St low res- 320 x 200, 16 colours
+  * 1: St med res- 640 x 200, 4 colours
+  * 2: St hi res- 640 x 400, monochrome
 
 By default, the screen memory is cleared and the default palette for each mode is set.
 
@@ -151,6 +163,8 @@ Stop colour cycling. If the animation interrupt is running, this will be stopped
 
 * cycle_id = index of colour cycling animation (0-3)
 
+---
+
 ##Properties
 
 ###screen_memory
@@ -169,6 +183,7 @@ Colour cycling information. This is an array of up to 4 objects, each with the f
 * right_colour - ending colour index of the animation
 * direction - direction of the animation (-1 = left, 0 = off, 1 = right)
 * delay - delay of the animation in 1/1000ths of second
+
 ###scale
 
 Whether to automatically scale the AtariScreen image or not.

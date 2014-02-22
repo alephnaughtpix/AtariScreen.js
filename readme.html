@@ -9,9 +9,13 @@
         <div id="header">
             <h1>AtariScreen</h1>
             <p><strong>A Javascript and HTML5 library for emulating the bit plane screen of an Atari 16/24 bit computer.</strong></p>
-            <p><em>Current version: <strong>v0.4 (2014-02-21)</strong></em></p>
+            <p><em>Current version: <strong>v0.42 (2014-02-22)</strong></em></p>
         </div>
         <h2>Updates</h2>
+        <h3>v0.42 (2014-02-22)</h3>
+        <ul>
+            <li>Various bugfixes.</li>
+        </ul>
         <h3>v0.4 (2014-02-21)</h3>
         <ul>
             <li>Reorganistation of code for stability and optimisation.</li>
@@ -264,6 +268,7 @@
             <li><strong>extras/demo.js</strong> - source code for the demo at the bottom of this page</li>
             <li><strong>extras/main.css</strong> - CSS file for this page</li>
             <li><strong>extras/demo_pictures</strong> - various pictures in Degas Elite format for the demo.</li>
+            <li><strong>extras/cycle_demo</strong> - Degas Elite format pictures with colour cycling information for the demo.</li>
         </ul>
         <hr />
         <h2>Usage</h2>
@@ -377,6 +382,8 @@
             <li><strong>direction</strong> - direction of the animation (-1 = left, 0 = off, 1 = right)</li>
             <li><strong>delay</strong> - delay of the animation in 1/1000ths of second</li>
         </ul>
+        <h3>scale</h3>
+        <p>Whether to automatically scale the AtariScreen image or not.</p>
         <h3>canvas</h3>
         <p><strong>[Read only]</strong> The HTML5 canvas element used by the AtariScreen object</p>
         <h3>mode</h3>
@@ -387,14 +394,12 @@
         <p><strong>[Read only]</strong> The width of the AtariScreen.</p>
         <h3>height</h3>
         <p><strong>[Read only]</strong> The height of the AtariScreen.</p>
-        <h3>scale</h3>
-        <p><strong>[Read only]</strong> Whether to automatically scale the AtariScreen image or not.</p>
         <h3>ready</h3>
         <p><strong>[Read only]</strong> Whether the screen is ready for drawing or not.</p>
         <hr />
         <h2>Demo</h2>
-        <h3>Load and display an ST format picture</h3>
         <p><em>(Source code <a href="extras/demo.js" target="_blank">here</a>.)</em></p>
+        <h3>Load and display an ST format picture</h3>
         <p>Select an Atari picture file (.P??) to view in the AtariScreen below. There are demo pictures within <em>extras/demo_pictures</em></p>
         <p><input type="checkbox" checked="checked" id="autoscale"/> Autoscale image?</p>
         <input type="file" id="files" name="files[]" />

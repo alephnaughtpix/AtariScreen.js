@@ -1,9 +1,7 @@
 
 var testScreen, testScreen2;
 var animationLoaded = false;
-var demo2running = false;
 var postback = false;
-var demo2anim = null;
 
 // Initialisation of screen and "Test Card", called by body.onload
 function initTest() {
@@ -34,18 +32,41 @@ function initTest() {
             testScreen2.screen_memory[i + 2] = 3855;
             testScreen2.screen_memory[i + 3] = 255;
         }
-        var colour = 0;
+        // Replace standard St mode 0 palette with black -> white gradient
+        //
+        // If you want a demonstration of how frustrating it was to work 
+        // with the STE palette registers, here it is! 
+        //
+        // In order to do a black -> white gradient, you can't just go from 0 to 0xFFF 
+        // in 0x111 jumps- what you actually have to do is go: 
+        //    0, 0x888, 0x111, 0x999, 0x222 ... 0xFFF!
+        //
+        // This is due to the least significant bit of the STE colour actually being the 
+        // most significant bit in the colour register in order to remain compatible 
+        // with the STFM colour register. So every colour transition performed on STE 
+        // colour registers would need to be aware of this, and coders would invariably have to
+        // mess around with bitwise operations in order to keep the STE least significant 
+        // bit separate from the STFM value, and combine the results differently according
+        // to whether they are using the value as represented in the palette registers,
+        // or whether they're using what the value *actually represents*, eg for numerical
+        // comparisons.
+        var colour = 0;					// Base "STFM" colour
+        var lsb = 0x888;				// "STE" addition to colour
+        var dest_colour = 0;			// Combined "STFM" + "STE" colour result 
         for (i = 0; i < 16; i++) {
-            testScreen2.SetPaletteValue(i, colour);
-            colour += 0x111;
+        	lsb ^= 0x888;					// Exclusive OR STE least significant bits 
+        	dest_colour = colour + lsb;		// Combine "STFM" and "STE" values 
+            testScreen2.SetPaletteValue(i, dest_colour);	// Add to palette
+            if (lsb > 0)					// If we've been setting an STE grey
+            	colour += 0x111;			// Go to ne STFM grey
         }
         var colour_animation = new Object();            // Create the colour cycling
-        colour_animation.left_colour = 0;  
-        colour_animation.right_colour = 15;
-        colour_animation.direction = 1;
-        colour_animation.delay = 100;
-        testScreen2.cycles.push(colour_animation);
-        testScreen2.Display();
+        colour_animation.left_colour = 0;  				// Cycling goes from first colour...
+        colour_animation.right_colour = 15;				// ... to last
+        colour_animation.direction = 1;					// Cycling goes ->
+        colour_animation.delay = 100;					// Animation rate is 1/10 s
+        testScreen2.cycles.push(colour_animation);		// Add to cycles in the demo screen
+        testScreen2.Display();							// Display the screen
         // Event listener for load file button
         document.getElementById('files2').addEventListener('change', load_demo2file, false);
 
@@ -90,18 +111,17 @@ function load_demo2file(evt) {
 }
 
 // Toggle colour cycling demo on and off
+// Called by onClick of 'cyclingButton' button.
 function toggleDemo2() {
 	var button = document.getElementById('cyclingButton');
-	if (demo2running) {
-	    testScreen2.StopCycle(0);
-	    testScreen2.Display();
+	if (testScreen2.cycles[0].animating) {			// If animation is running
+	    testScreen2.StopCycle(0);					// Stop it
+	    testScreen2.Display();						// ... and reset to start palette
 		button.value = 'Start Cycling';
-		demo2running = false;
 	}
-	else {
-	    testScreen2.StartCycle(0);
-	    testScreen2.StartCycleAnimation(0);
+	else {											// If animation is not running
+	    testScreen2.StartCycle(0);					// Initialise colour cycling
+	    testScreen2.StartCycleAnimation(0);			// ... and start animation interrupt 
 		button.value = 'Stop Cycling';
-		demo2running = true;
 	}
 }

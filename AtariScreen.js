@@ -1,4 +1,4 @@
-﻿/* AtariScreen v0.4 (2014-02-21)
+﻿/* AtariScreen v0.42 (2014-02-22)
  *
  * Emulate bit plane screen on an Atari 16/24 bit computer.
  *
@@ -63,6 +63,8 @@ function AtariScreen(mode, element, name, autoscale) {
     this.palette = palette;
     this.screen_memory = screen_memory;
     this.cycles = colour_cycles;
+    // The above properties are objects so they're automatically passed by reference. 
+    // However, the following can only be passed by value, so here's a get/set for it.
     Object.defineProperty(this, "scale",
         {
             get: function () { return scale; },
@@ -234,6 +236,7 @@ function AtariScreen(mode, element, name, autoscale) {
         restore_palette = new Array(length);        // Backup palette
         for (var i = 0; i < length; i++)            // Set palette values
             SetPaletteValue(i, newpalette[i]);
+        this.palette = palette;						// Relink to property
     };
 
     /* Convert ST(E) colour register value to HTML5 colour value.
@@ -310,8 +313,15 @@ function AtariScreen(mode, element, name, autoscale) {
                     ((128 - // Value taken from 128
                         dv.getUint16(position + (i * 2) + 24)   // Get value
                     ) * 1000) / 60);                            // Convert 1/60ths to 1/1000ths second
+                colour_animation.position = 0;                  // Reset position of cycling to start
+                colour_animation.length = (
+                	colour_animation.right_colour - colour_animation.left_colour
+                	) + 1; 										// Get length of cycle range
+                colour_animation.on = false;					// Rest animation flags;
+                colour_animation.animating = false;
                 colour_cycles.push(colour_animation);           // Add animation to the list
             }
+            this.cycles = colour_cycles;						// Relink info to property
         }
     };
 
@@ -437,7 +447,9 @@ function AtariScreen(mode, element, name, autoscale) {
                         pixel_palette[i][2]
                     ];
                 cycle_info.position = 0;                    // Reset position of cycling to start
-                cycle_info.length = (cycle_info.right_colour - cycle_info.left_colour) + 1; // Get length of cycle range
+                cycle_info.length = (
+                	cycle_info.right_colour - cycle_info.left_colour
+                	) + 1; 									// Get length of cycle range
                 cycle_info.on = true;                       // Flag we're ready to start
                 if (start_animation)                        // Start animation interrupt if specified
                     StartCycleAnimation(cycle_id);
@@ -502,7 +514,7 @@ function AtariScreen(mode, element, name, autoscale) {
                     },
                     cycle_info.delay                        // cycle delay
                 );
-                cycle_info.animating = true;                // Set animating flag to true
+                cycle_info.animating = true;   // Set animating flag to true
             }
         }
         return id;      // Return back animation id (if successful) or -1 (if not successful)
