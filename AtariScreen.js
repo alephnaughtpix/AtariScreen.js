@@ -40,7 +40,7 @@ function AtariScreen(mode, element, name, autoscale) {
         scaleX, 
         scaleY;
 
-    // Initialise local variables
+    // Initialise private variables
     var scale = autoscale;
     var ready = true;
     var screen_memory = new Uint16Array(16000);
@@ -310,7 +310,7 @@ function AtariScreen(mode, element, name, autoscale) {
                     ((128 - // Value taken from 128
                         dv.getUint16(position + (i * 2) + 24)   // Get value
                     ) * 1000) / 60);                            // Convert 1/60ths to 1/1000ths second
-                colour_cycles.push(colour_animation);           // Add animtion to the list
+                colour_cycles.push(colour_animation);           // Add animation to the list
             }
         }
     };
@@ -439,7 +439,7 @@ function AtariScreen(mode, element, name, autoscale) {
                 cycle_info.position = 0;                    // Reset position of cycling to start
                 cycle_info.length = (cycle_info.right_colour - cycle_info.left_colour) + 1; // Get length of cycle range
                 cycle_info.on = true;                       // Flag we're ready to start
-                if (start_animation)                        // Start animation interupt if specified
+                if (start_animation)                        // Start animation interrupt if specified
                     StartCycleAnimation(cycle_id);
                 success = true;                             // Operation fully successful   
             }
