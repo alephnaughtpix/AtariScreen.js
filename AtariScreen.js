@@ -1,4 +1,4 @@
-﻿/* AtariScreen v0.42 (2014-02-22)
+﻿/* AtariScreen v0.43 (2016-02-20)
  *
  * Emulate bit plane screen on an Atari 16/24 bit computer.
  *
@@ -38,7 +38,8 @@ function AtariScreen(mode, element, name, autoscale) {
         screen_mode,
         screen_planes,
         scaleX, 
-        scaleY;
+        scaleY,
+        defaultPalette;
 
     // Initialise private variables
     var scale = autoscale;
@@ -60,16 +61,41 @@ function AtariScreen(mode, element, name, autoscale) {
     this.ready = function () { return ready; };
 
     // Set up read/write properties
-    this.palette = palette;
-    this.screen_memory = screen_memory;
     this.cycles = colour_cycles;
+    this.canvas = canvas;
     // The above properties are objects so they're automatically passed by reference. 
     // However, the following can only be passed by value, so here's a get/set for it.
-    Object.defineProperty(this, "scale",
-        {
-            get: function () { return scale; },
-            set: function (val) { scale = val; }
-        });
+    Object.defineProperties(this, {
+    	"scale":
+	        {
+	            get: function () { return scale; },
+	            set: function (val) { scale = val; }
+	        },
+		"default_palette":
+        	{
+	            get: function () { return defaultPalette; }
+        	},
+    	"palette":
+        	{
+	            get: function () { return palette; },
+	            set: function (val) { palette = val; }
+        	},
+        "canvas_palette":
+        	{
+	            get: function () { return canvas_palette; },
+	            set: function (val) { canvas_palette = val; }
+        	},
+        "pixel_palette":
+        	{
+	            get: function () { return pixel_palette; },
+	            set: function (val) { pixel_palette = val; }
+        	},
+        "screen_memory":
+        	{
+	            get: function () { return screen_memory; },
+	            set: function (val) { screen_memory = val; }
+        	}
+    });
     
     // Set up public methods
     this.SetMode = SetMode;
@@ -84,6 +110,8 @@ function AtariScreen(mode, element, name, autoscale) {
     this.GetNextCycle = GetNextCycle;
     this.StartCycleAnimation = StartCycleAnimation;
     this.StopCycle = StopCycle;
+    this.Show = show;
+    this.Hide = hide;
 
     // Finally, initialise AtariScreen in the required graphics mode
     SetMode(mode);
@@ -93,6 +121,14 @@ function AtariScreen(mode, element, name, autoscale) {
 
     
     // PRIVATE METHODS ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+    function show() {
+        canvas.style.visibility = 'visible';
+    }
+
+    function hide() {
+        canvas.style.visibility = 'hidden';
+    }
 
     /* Set up canvas for AtariScreen */
     function setupCanvas() {
@@ -145,9 +181,8 @@ function AtariScreen(mode, element, name, autoscale) {
                 scaleY = 2; // 320 x 200
                 screen_width = 320;
                 screen_height = 200;
-                SetPalette(
-                    new Uint16Array([0xFFF, 0xF00, 0x0F0, 0xFF0, 0x00F, 0xF0F, 0x0FF, 0x555, 0x333, 0xF33, 0x3F3, 0xFF3, 0x33F, 0xF3F, 0x3FF, 0])
-                );
+                defaultPalette = new Uint16Array([0xFFF, 0xF00, 0x0F0, 0xFF0, 0x00F, 0xF0F, 0x0FF, 0x555, 0x333, 0xF33, 0x3F3, 0xFF3, 0x33F, 0xF3F, 0x3FF, 0]);
+                SetPalette(defaultPalette);
                 break;
             }
         case 1:
@@ -158,7 +193,8 @@ function AtariScreen(mode, element, name, autoscale) {
                 scaleY = 2; // 640 x 200
                 screen_width = 640;
                 screen_height = 200;
-                SetPalette(new Uint16Array([0xFFF, 0xF00, 0x0F0, 0]));
+                defaultPalette = new Uint16Array([0xFFF, 0xF00, 0x0F0, 0]);
+                SetPalette(defaultPalette);
                 break;
             }
         case 2:
@@ -169,7 +205,8 @@ function AtariScreen(mode, element, name, autoscale) {
                 scaleY = 1; // 640 x 400
                 screen_width = 640;
                 screen_height = 400;
-                SetPalette(new Uint16Array([0, 0xFFF]));
+                defaultPalette = new Uint16Array([0, 0xFFF]);
+                SetPalette(defaultPalette);
                 break;
             }
         }
@@ -237,6 +274,8 @@ function AtariScreen(mode, element, name, autoscale) {
         for (var i = 0; i < length; i++)            // Set palette values
             SetPaletteValue(i, newpalette[i]);
         this.palette = palette;						// Relink to property
+        this.pixel_palette = pixel_palette;						// Relink to property
+        this.canvas_palette = canvas_palette;						// Relink to property
     };
 
     /* Convert ST(E) colour register value to HTML5 colour value.
@@ -508,7 +547,7 @@ function AtariScreen(mode, element, name, autoscale) {
                 id = cycle_info.animationId = setInterval(  // Start animation and save id
                     function() {                        // INTERRUPT FUNCTION: call passes in reference to current AtariScreen object
                         GetNextCycle(cycle_id);         //   Get next colour cycle
-                        requestAnimationFrame(function() {  //   Wait for next frame
+                        requestAnimFrame(function() {  //   Wait for next frame
                             Display();                      //   Display new frame
                         });
                     },
@@ -553,3 +592,15 @@ function AtariScreen(mode, element, name, autoscale) {
     // END OF PUBLIC METHODS ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 }
+
+window.requestAnimFrame = (function(){
+	return  window.requestAnimationFrame       || 
+		window.webkitRequestAnimationFrame || 
+		window.mozRequestAnimationFrame    || 
+		window.oRequestAnimationFrame      || 
+		window.msRequestAnimationFrame     || 
+		function(/* function */ callback, /* DOMElement */ element){
+			window.setTimeout(callback, 1000 / 60);
+		};
+})();
+

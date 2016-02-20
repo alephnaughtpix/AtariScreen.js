@@ -2,9 +2,13 @@
 
 ##A Javascript and HTML5 library for emulating the bit plane screen of an Atari 16/24 bit computer.
 
-###Current version: v0.42 (2014-02-22)
+###Current version: v0.43 (2015-02-20)
 
 ##Updates
+
+###v0.43 (2015-02-20)
+
+* This library got used in an emulation of an Atari demo! Unfortunately it was _Xmas Card '97_ by The Senior Dads. :) At their request, I added _default_palette_, _canvas_palette_, and _pixel_palette_ properties.
 
 ###v0.42 (2014-02-22)
 
@@ -176,6 +180,18 @@ The screen memory of the AtariScreen object, in an array of 16000 Uint16 values
 ###palette
 
 The palette of the AtariScreen.
+
+###default_palette
+
+The default palette for an ST Screen, in an array of 16 Uint16 values.
+
+###canvas_palette
+
+The palette of the AtariScreen, in an array of 16 strings of the form '#rrggbb'.
+
+###pixel_palette
+
+The palette of the AtariScreen, in an array of 16 x 3 byte arrays of the form [r, g, b].
 
 ###cycles
 

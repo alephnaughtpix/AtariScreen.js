@@ -2,16 +2,22 @@
     <head>
         <title>AtariScreen.js README</title>
         <link rel="stylesheet" type="text/css" href="extras/main.css" />
-        <script src="AtariScreen.mini.js" language="Javascript" type="text/javascript" ></script>
+        <script src="AtariScreen.js" language="Javascript" type="text/javascript" ></script>
         <script src="extras/demo.js" language="Javascript" type="text/javascript" ></script>
     </head>
     <body onload="initTest();">
         <div id="header">
             <h1>AtariScreen</h1>
             <p><strong>A Javascript and HTML5 library for emulating the bit plane screen of an Atari 16/24 bit computer.</strong></p>
-            <p><em>Current version: <strong>v0.42 (2014-02-22)</strong></em></p>
+            <p><em>Current version: <strong>v0.43 (2015-02-20)</strong></em></p>
         </div>
         <h2>Updates</h2>
+        <h3>v0.43 (2015-02-20)</h3>
+        <ul>
+            <li>This library got used in an emulation of an Atari demo! 
+            Unfortunately it was <i>Xmas Card '97</i> by The Senior Dads. :) 
+            At their request, I added <i>default_palette</i>, <i>canvas_palette</i>, and <i>pixel_palette</i> properties.</li>
+        </ul>
         <h3>v0.42 (2014-02-22)</h3>
         <ul>
             <li>Various bugfixes.</li>
@@ -373,7 +379,13 @@
         <h3>screen_memory</h3>
         <p>The screen memory of the AtariScreen object, in an array of 16000 Uint16 values</p>
         <h3>palette</h3>
-        <p>The palette of the AtariScreen.</p>
+        <p>The palette of the AtariScreen, in an array of 16 Uint16 values.</p>
+        <h3>default_palette</h3>
+        <p>The default palette for an ST Screen, in an array of 16 Uint16 values.</p>
+        <h3>canvas_palette</h3>
+        <p>The palette of the AtariScreen, in an array of 16 strings of the form '#rrggbb'.</p>
+        <h3>pixel_palette</h3>
+        <p>The palette of the AtariScreen, in an array of 16 x 3 byte arrays of the form [r, g, b].</p>
         <h3>cycles</h3>
         <p>Colour cycling information. This is an array of up to 4 objects, each with the following properties:</p>
         <ul>
@@ -403,6 +415,7 @@
         <p>Select an Atari picture file (.P??) to view in the AtariScreen below. There are demo pictures within <em>extras/demo_pictures</em></p>
         <p><input type="checkbox" checked="checked" id="autoscale"/> Autoscale image?</p>
         <input type="file" id="files" name="files[]" />
+		<p><a href="#" target="_blank" id="download">Open in a new window</a> as a downloadable PNG file.</p>
         <div id="test"></div>
         <h3>Colour Cycling</h3>
         <p>Select an Atari picture file (.P??) from <em>extras/cycle_demo</em> folder to view in the AtariScreen below.</p>
