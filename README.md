@@ -1,31 +1,31 @@
-#AtariScreen.js
+# AtariScreen.js
 
-##A Javascript and HTML5 library for emulating the bit plane screen of an Atari 16/24 bit computer.
+## A Javascript and HTML5 library for emulating the bit plane screen of an Atari 16/24 bit computer.
 
-###Current version: v0.43 (2015-02-20)
+### Current version: v0.43 (2015-02-20)
 
-##Updates
+## Updates
 
-###v0.43 (2015-02-20)
+### v0.43 (2015-02-20)
 
 * This library got used in an emulation of an Atari demo! Unfortunately it was _Xmas Card '97_ by The Senior Dads. :) At their request, I added _default_palette_, _canvas_palette_, and _pixel_palette_ properties.
 
-###v0.42 (2014-02-22)
+### v0.42 (2014-02-22)
 
 * Various bugfixes.
 
-###v0.4 (2014-02-21)
+### v0.4 (2014-02-21)
 
 * Reorganistation of code for stability and optimisation.
 * Some properties have made read-only, and some are no longer accessible.
 * Fixed bug in colour cycling animation.
 
-###v0.3 (2014-02-20)
+### v0.3 (2014-02-20)
 
 * Colour cycling animation
 * More display optimisations
 
-###v0.2 (2014-02-10)
+### v0.2 (2014-02-10)
 
 * Much more optimised screen display
 * Scaling is now optional
@@ -34,13 +34,13 @@
 
 ---
 
-##Introduction
+## Introduction
 
 AtariScreen implements an HTML5 emulation of the bit plane based video modes of Atari computers from the ST onwards. 
 It is designed to be used when you want to emulate some aspect of an Atari screen that cannot otherwise be easily 
 emulated on the HTML Canvas.
 
-##AtariScreen features
+## AtariScreen features
 
 * Emulates 3 planar bitmap graphics modes on Atari ST computers
 * Emulates ST colour palette registers, and is compatible with STE colour values.
@@ -48,7 +48,7 @@ emulated on the HTML Canvas.
 * Can automatically scale according to graphics mode.
 * Can simulate colour cycling.
 
-##Files
+## Files
 
 * `AtariScreen.mini.js` - minified version of AtariScreen. This is best version to use for websites.
 * `AtariScreen.js` - the full source code for AtariScreen. Use this if you're wanting to hack around with the code.
@@ -60,7 +60,7 @@ emulated on the HTML Canvas.
 
 ---
 
-##Usage
+## Usage
 
 Include AtariScreen in the `<head>` element of your web page:
 
@@ -84,9 +84,9 @@ In your javascript code, instantiate an AtariScreen object, passing in the scree
   
 ---
 
-##Methods
+## Methods
 
-###SetMode(newmode)
+### SetMode(newmode)
 
 Set graphics mode of AtariScreen object
 
@@ -98,24 +98,24 @@ Set graphics mode of AtariScreen object
 
 By default, the screen memory is cleared and the default palette for each mode is set.
 
-###Display()
+### Display()
 
 Display current AtariScreen buffer according to the stored bitmap data and colour palette.
 
-###SetPaletteValue(colour, value)
+### SetPaletteValue(colour, value)
 
 Set colour palette register.
 
 * color = index of colour register
 * value = ST(E) hex colour value (0xRGB)
 
-###SetPalette(newpalette)
+### SetPalette(newpalette)
 
 Set colour values for a whole palette
 
 * newpalette = Uint16Array of palette values
 
-###ExtractDegasElite(data)
+### ExtractDegasElite(data)
 
 Extract Degas Elite data from an ArrayBuffer to AtariScreen object screen memory and palette
 
@@ -123,47 +123,47 @@ Extract Degas Elite data from an ArrayBuffer to AtariScreen object screen memory
 
 This can process any .P?? format Degas Elite file. By default, it sets the graphics mode according to the file header, and sets the screen palette to the values in the picture file. (This will be reflected the next time the "Display" method is called.)
 
-###ExtractPalette(dv, position)
+### ExtractPalette(dv, position)
 
 Extract a palette from a DataView of an ArrayBuffer, and set the AtariScreen palette accordingly.
 
 * dv = DataView of ArrayBuffer containing palette information
 * position = position in ArrayBuffer
 
-###ExtractPlanarScreen(dv, position)
+### ExtractPlanarScreen(dv, position)
 
 Extract uncompressed planar screen data from a DataView of an ArrayBuffer, to the AtariScreen screen memory.
 
 * dv = DataView of ArrayBuffer containing planar screen data
 * position = position in ArrayBuffer
 
-###ExtractRLEData(dv, position)
+### ExtractRLEData(dv, position)
 
 Extract RLE compressed screen data from a DataView of an ArrayBuffer, to the AtariScreen screen memory. This is the type of compression used in Degas Elite compressed files. It's also used in other files eg the IFF format, from where it originated.
 
 * dv = DataView of ArrayBuffer containing compressed bitmap information
 * position = position in ArrayBuffer
 
-###StartCycle(cycle_index, start_animation)
+### StartCycle(cycle_index, start_animation)
 
 Initialise colour cycling
 
 * cycle_id = index of colour cycling animation (0-3)
 * start_animation (optional) = true if starting animation interrupt (default is false)
 
-###StartCycleAnimation(cycle_index)
+### StartCycleAnimation(cycle_index)
 
 Start colour cycling animation interrupt
 
 * cycle_id = index of colour cycling animation (0-3)
 
-###GetNextCycle(cycle_index)
+### GetNextCycle(cycle_index)
 
 Execute next step of colour cycling
 
 * cycle_id = index of colour cycling animation (0-3)
 
-###StopCycle(cycle_index)
+### StopCycle(cycle_index)
 
 Stop colour cycling. If the animation interrupt is running, this will be stopped.
 
@@ -171,29 +171,29 @@ Stop colour cycling. If the animation interrupt is running, this will be stopped
 
 ---
 
-##Properties
+## Properties
 
-###screen_memory
+### screen_memory
 
 The screen memory of the AtariScreen object, in an array of 16000 Uint16 values
 
-###palette
+### palette
 
 The palette of the AtariScreen.
 
-###default_palette
+### default_palette
 
 The default palette for an ST Screen, in an array of 16 Uint16 values.
 
-###canvas_palette
+### canvas_palette
 
 The palette of the AtariScreen, in an array of 16 strings of the form '#rrggbb'.
 
-###pixel_palette
+### pixel_palette
 
 The palette of the AtariScreen, in an array of 16 x 3 byte arrays of the form [r, g, b].
 
-###cycles
+### cycles
 
 Colour cycling information. This is an array of up to 4 objects, each with the following properties:
 
@@ -202,31 +202,31 @@ Colour cycling information. This is an array of up to 4 objects, each with the f
 * direction - direction of the animation (-1 = left, 0 = off, 1 = right)
 * delay - delay of the animation in 1/1000ths of second
 
-###scale
+### scale
 
 Whether to automatically scale the AtariScreen image or not.
 
-###canvas
+### canvas
 
 _Read only_ The HTML5 canvas element used by the AtariScreen object
 
-###mode
+### mode
 
 _Read only_ The current screen mode of AtariScreen object
 
-###planes
+### planes
 
 _Read only_ The number of bitmap planes used.
 
-###width
+### width
 
 _Read only_ The width of the AtariScreen.
 
-###height
+### height
 
 _Read only_ The height of the AtariScreen.
 
-###ready
+### ready
 
 _Read only_ Whether the screen is ready for drawing or not.
 
