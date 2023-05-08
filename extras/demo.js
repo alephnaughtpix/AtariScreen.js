@@ -18,11 +18,11 @@ function initTest() {
             testScreen.screen_memory[i + 3] = 255;
         }
         testScreen.Display();
+        document.getElementById('download').href = testScreen.canvas.toDataURL();
         // Event listener for load file button
         document.getElementById('files').addEventListener('change', load_file, false);
         
-        
-    	// Now start the colour cycling demo
+     	// Now start the colour cycling demo
         var testPlace2 = document.getElementById('test2');
         testScreen2 = new AtariScreen(0, testPlace2, 'myTest2', true);
         // Test card - columns of colours 0-15
@@ -87,6 +87,7 @@ function load_file(evt) {
             testScreen.scale = (document.getElementById('autoscale').checked);
             testScreen.ExtractDegasElite(reader.result);
             testScreen.Display();
+            document.getElementById('download').href = testScreen.canvas.toDataURL();
         };
     })(f);
     reader.readAsArrayBuffer(f);
