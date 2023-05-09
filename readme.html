@@ -2,16 +2,20 @@
     <head>
         <title>AtariScreen.js README</title>
         <link rel="stylesheet" type="text/css" href="extras/main.css" />
-        <script src="AtariScreen-es6.js" language="Javascript" type="text/javascript" ></script>
+        <script src="AtariScreen-es6.mini.js" language="Javascript" type="text/javascript" ></script>
         <script src="extras/demo.js" language="Javascript" type="text/javascript" ></script>
     </head>
     <body onload="initTest();">
         <div id="header">
             <h1>AtariScreen</h1>
             <p><strong>A Javascript and HTML5 library for emulating the bit plane screen of an Atari 16/24 bit computer.</strong></p>
-            <p><em>Current version: <strong>v0.43 (2015-02-20)</strong></em></p>
+            <p><em>Current version: <strong>v0.5 (2023-05-08)</strong></em></p>
         </div>
         <h2>Updates</h2>
+        <h3>v0.5 (2015-02-20)</h3>
+        <ul>
+            <li>8 years later (!), I've refactored the library in ES6 javascript, which, according to <a target="_blank" href="https://caniuse.com/es6">CanIUse</a>, works on 98.4% of web browsers. The original version is now in the folder <i>pure-js</i>.</li>
+        </ul>
         <h3>v0.43 (2015-02-20)</h3>
         <ul>
             <li>This library got used in an emulation of an Atari demo! 
@@ -414,7 +418,7 @@
         <h3>Load and display an ST format picture</h3>
         <p>Select an Atari picture file (.P??) to view in the AtariScreen below. There are demo pictures within <em>extras/demo_pictures</em></p>
         <p><input type="checkbox" checked="checked" id="autoscale"/> Autoscale image?</p>
-        <input type="file" id="files" name="files[]" />
+        <input type="file" id="files" name="files[]" /> <i><span id="pic-info1">Programmatically generated test card.</span></i>
 		<p><a href="#" id="download">Open in a new window</a> as a downloadable PNG file.</p>
         <div id="test"></div>
         <h3>Colour Cycling</h3>

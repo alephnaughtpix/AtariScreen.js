@@ -2,7 +2,7 @@
  *
  * Emulate bit plane screen on an Atari 16/24 bit computer.
  *
- * Uses HTML5 Canvas
+ * Uses HTML5 Canvas & ES6 Javascript.
  *
  * Example usage:
  * 
@@ -16,6 +16,7 @@
 
 class AtariScreen {
 
+    // Public properties
     palette;
     canvas;
     canvas_palette;
@@ -47,7 +48,7 @@ class AtariScreen {
     constructor(mode, element, name, autoscale) {
         if (autoscale === undefined) autoscale = true;      // If not defined, set to true as default
 
-         // Initialise private variables
+         // Initialise properties
         this.scale = autoscale;
         this.#ready = true;
         this.screen_memory = new Uint16Array(16000);
@@ -59,7 +60,7 @@ class AtariScreen {
         this.canvas.width = 640;
         this.canvas.height = 400;
 
-        // Set up read/write properties
+        // Set up colour cycling
         this.cycles = this.#colour_cycles;
 
         // Finally, initialise AtariScreen in the required graphics mode
@@ -96,7 +97,7 @@ class AtariScreen {
     /* Initialise blank AtariScreen */
     #initialise_screen() {
         var context = this.#setup_canvas();                                 // Set the canvas up
-        context.fillStyle = this.canvas_palette[0];                              // Get background colour
+        context.fillStyle = this.canvas_palette[0];                         // Get background colour
         context.fillRect(0, 0, this.#screen_width, this.#screen_height);    // Fill screen with background colour
     }
 
@@ -214,8 +215,8 @@ class AtariScreen {
         this.palette = new Array(length);                // Palette of ST(E) register values 
         this.canvas_palette = new Array(length);         // Palette of Web colour values   
         this.pixel_palette = new Array(length);          // Palette of canvas pixel colour values    
-        this.#restore_palette = new Array(length);        // Backup palette
-        for (var i = 0; i < length; i++)                // Set palette values
+        this.#restore_palette = new Array(length);       // Backup palette
+        for (var i = 0; i < length; i++)                 // Set palette values
             this.SetPaletteValue(i, newpalette[i]);
     };
     
@@ -264,16 +265,16 @@ class AtariScreen {
      * To do this call the 'Display' method.
      */
     ExtractDegasElite(data) {
-        var dv = new DataView(data);                        // Get reader for buffer data
+        var dv = new DataView(data);                            // Get reader for buffer data
         // Initial flag is a word comprised of [Compression flag byte & Graphics mode byte]
-        var mode_data = dv.getUint16(0); // Get initial file header flag
-        this.SetMode(mode_data & 0x00FF);                        // Set ST(E) graphics mode.
-        this.ExtractPalette(dv, 2);                              // Extract palette information
+        var mode_data = dv.getUint16(0);                        // Get initial file header flag
+        this.SetMode(mode_data & 0x00FF);                       // Set ST(E) graphics mode.
+        this.ExtractPalette(dv, 2);                             // Extract palette information
         var position;
-        if ((mode_data & 0x8000) > 0)                       // Detect if compressed 
-            position = this.ExtractRLEData(dv, 34);              // If .PC? file
+        if ((mode_data & 0x8000) > 0)                           // Detect if compressed 
+            position = this.ExtractRLEData(dv, 34);             // If .PC? file
         else
-            position = this.ExtractPlanarScreen(dv, 34);         // If .PI? file
+            position = this.ExtractPlanarScreen(dv, 34);        // If .PI? file
 
         // Degas Elite files differ from earlier Degas files in that they have a list of 4 colour cycling
         // definitions at the end, so now this is checked for. 
@@ -299,7 +300,7 @@ class AtariScreen {
                     ) + 1; 										// Get length of cycle range
                 colour_animation.on = false;					// Rest animation flags;
                 colour_animation.animating = false;
-                this.#colour_cycles.push(colour_animation);           // Add animation to the list
+                this.#colour_cycles.push(colour_animation);     // Add animation to the list
             }
         }
     };
@@ -313,13 +314,13 @@ class AtariScreen {
      * ST(E) colour values in the order they appear in the registers.
      */
     ExtractPalette(dv, position) {
-        var length = this.palette.length;                // Get palette length according to the graphics mode
-        var newpalette = new Uint16Array(length);   // Copy the palette from the buffer data
+        var length = this.palette.length;               // Get palette length according to the graphics mode
+        var newpalette = new Uint16Array(length);       // Copy the palette from the buffer data
         for (var i = 0; i < length; i++) {
             newpalette[i] = dv.getUint16(position);
-            position += 2;                          // Move to next word
+            position += 2;                              // Move to next word
         }
-        this.SetPalette(newpalette);                     // Set the palette in the AtariScreen object
+        this.SetPalette(newpalette);                    // Set the palette in the AtariScreen object
     };
     
     /* Extract uncompressed planar screen data to AtariScreen object
@@ -329,12 +330,12 @@ class AtariScreen {
     * Returns the length of the data
     */
     ExtractPlanarScreen(dv, position) {
-        var length = this.screen_memory.length;              // Get screen memory length (usually 16000 words)
-        for (var i = 0; i < length; i++) {              // Copy from ArrayBuffer to AtariScreen buffer
+        var length = this.screen_memory.length;             // Get screen memory length (usually 16000 words)
+        for (var i = 0; i < length; i++) {                  // Copy from ArrayBuffer to AtariScreen buffer
             this.screen_memory[i] = dv.getUint16(position);
-            position += 2;                              // Move to next word
+            position += 2;                                  // Move to next word
         }
-        return position;                                // Return length of data
+        return position;                                    // Return length of data
     };
     
     
@@ -360,37 +361,33 @@ class AtariScreen {
      * # x >= 0 - copy next (x + 1) bytes into buffer.
      */
     ExtractRLEData(dv, position) {
-        var pic_bytewidth = 160;                                // Width of scanline in bytes
-        console.info("Extracting RLE data");
-        console.log("Screen width: " + this.#screen_width);
-        console.log("Screen height: " + this.#screen_height);
-        console.log("Screen planes: " + this.#screen_planes);
-        var sl_bytewidth = (pic_bytewidth / this.#screen_planes);     // Width of scanline for single plane in bytes
-        var sl_looplength = (sl_bytewidth / 2);                 // Width of scanline for single plane in words
-        var i, j, k,                                            // Set up loop variables
-            buffer_pointer,                                     // Pointer to scanline buffer
-            decoded_length,                                     // Length of data packet when decoded
-            control_byte,                                       // Variable for control byte
-            size;                                               // Size of compressed data
-        var scanline_buffer = new ArrayBuffer(pic_bytewidth);   // Set up scanline buffer 
-        var sl_dv = new DataView(scanline_buffer);              // Set up view for scanline buffer
-        var screen_pointer = 0;                                 // Set pointer to start of output screen buffer                
-        for (i = 0; i < this.#screen_height; i++) {       // Do for each scan line...
-            buffer_pointer = 0;                     // Go to start of scanline buffer
-            for (j = 0; j < this.#screen_planes; j++) {   // Decode data for each plane
+        var pic_bytewidth = 160;                                    // Width of scanline in bytes
+        var sl_bytewidth = (pic_bytewidth / this.#screen_planes);   // Width of scanline for single plane in bytes
+        var sl_looplength = (sl_bytewidth / 2);                     // Width of scanline for single plane in words
+        var i, j, k,                                                // Set up loop variables
+            buffer_pointer,                                         // Pointer to scanline buffer
+            decoded_length,                                         // Length of data packet when decoded
+            control_byte,                                           // Variable for control byte
+            size;                                                   // Size of compressed data
+        var scanline_buffer = new ArrayBuffer(pic_bytewidth);       // Set up scanline buffer 
+        var sl_dv = new DataView(scanline_buffer);                  // Set up view for scanline buffer
+        var screen_pointer = 0;                                     // Set pointer to start of output screen buffer                
+        for (i = 0; i < this.#screen_height; i++) {                 // Do for each scan line...
+            buffer_pointer = 0;                                     // Go to start of scanline buffer
+            for (j = 0; j < this.#screen_planes; j++) {             // Decode data for each plane
                 decoded_length = 0;
-                while (decoded_length < sl_bytewidth) {         // Decode until a scanlines worth of data for a plane is complete
-                    control_byte = dv.getUint8(position++);     // Get control byte (8 bit 2's complement signed)
-                    if ((control_byte & 0x80) > 0) {            // If sign bit set... -> PACKED DATA    
-                        size = (256 - control_byte) + 1;        // Get size of unpacked data
-                        control_byte = dv.getUint8(position++); // Get next byte- this is the packed data
-                        for (k = 0; k < size; k++) {            // Copy this byte for the size of the unpacked data
+                while (decoded_length < sl_bytewidth) {             // Decode until a scanlines worth of data for a plane is complete
+                    control_byte = dv.getUint8(position++);         // Get control byte (8 bit 2's complement signed)
+                    if ((control_byte & 0x80) > 0) {                // If sign bit set... -> PACKED DATA    
+                        size = (256 - control_byte) + 1;            // Get size of unpacked data
+                        control_byte = dv.getUint8(position++);     // Get next byte- this is the packed data
+                        for (k = 0; k < size; k++) {                // Copy this byte for the size of the unpacked data
                             sl_dv.setUint8(buffer_pointer++, control_byte);
                             decoded_length++;
                         }
-                    } else {                                    // If sign bit not set... -> UNPACKED DATA
-                        control_byte++;                         // Get number of bytes to copy
-                        for (k = 0; k < control_byte; k++) {    // Copy them to the scanline buffer
+                    } else {                                        // If sign bit not set... -> UNPACKED DATA
+                        control_byte++;                             // Get number of bytes to copy
+                        for (k = 0; k < control_byte; k++) {        // Copy them to the scanline buffer
                             sl_dv.setUint8(buffer_pointer++, dv.getUint8(position++));
                             decoded_length++;
                         }
@@ -398,15 +395,15 @@ class AtariScreen {
                 }
             }
             // Now we have depacked the scanline, copy it to interleaved bitmap data in the screen buffer.
-            buffer_pointer = 0;                             // Go back to start of scanline buffer
-            for (j = 0; j < sl_looplength; j++) {           // For each word of the plane data
-                for (k = 0; k < this.#screen_planes; k++)         // For each plane
+            buffer_pointer = 0;                                     // Go back to start of scanline buffer
+            for (j = 0; j < sl_looplength; j++) {                   // For each word of the plane data
+                for (k = 0; k < this.#screen_planes; k++)           // For each plane
                 this.screen_memory[screen_pointer + k] = sl_dv.getUint16(buffer_pointer + (k * sl_bytewidth)); // Interleave bitmap data into screen buffer
-                buffer_pointer += 2;                        // Next word in scanline buffer
-                screen_pointer += this.#screen_planes;            // Next interleaved bitmap position
+                buffer_pointer += 2;                                // Next word in scanline buffer
+                screen_pointer += this.#screen_planes;              // Next interleaved bitmap position
             }
         }
-        return position;                                    // Return length of compressed data
+        return position;                                            // Return length of compressed data
     };
 
 
@@ -463,9 +460,9 @@ class AtariScreen {
                 if (current_position < left_start)
                     current_position = loop_position;
                 cycle_info.position = current_position;
-                var length = cycle_info.length;                 // Get length of cycle
+                var length = cycle_info.length;                      // Get length of cycle
                 for (var i = 0; i < length; i++) {
-                    if (current_position > loop_position)       // If we're past the end, go back to the start
+                    if (current_position > loop_position)            // If we're past the end, go back to the start
                         current_position = left_reset;
                     this.pixel_palette[left_start++] = [             // Copy palette entry to the display palette
                         this.#restore_palette[current_position][0],
@@ -473,7 +470,7 @@ class AtariScreen {
                         this.#restore_palette[current_position++][2]
                     ];
                 }
-                success = true;                                 // Operation fully successful
+                success = true;                                     // Operation fully successful
             }
         }
         return success;
@@ -492,9 +489,9 @@ class AtariScreen {
                 var this_instance = this;                   // Get reference to this instance
                 id = cycle_info.animationId = setInterval(  // Start animation and save id
                     function() {                            // INTERRUPT FUNCTION: call passes in reference to current AtariScreen object
-                        this_instance.GetNextCycle(cycle_id);             //   Get next colour cycle
-                        requestAnimFrame(function() {       //   Wait for next frame
-                            this_instance.Display();                      //   Display new frame
+                        this_instance.GetNextCycle(cycle_id);           //   Get next colour cycle
+                        requestAnimFrame(function() {                   //   Wait for next frame
+                            this_instance.Display();                    //   Display new frame
                         });
                     },
                     cycle_info.delay                        // cycle delay
@@ -518,14 +515,14 @@ class AtariScreen {
      */
     StopCycle(cycle_id) {
         var success = false;
-        if ((cycle_id >= 0) && (cycle_id <= 3)) {           // return value will be -1 if unsuccessful
-            var cycle_info = this.#colour_cycles[cycle_id];       // Get reference for the colour cycling info  
-            if (cycle_info.on) {                            // Don't bother if it's not on
-                if (cycle_info.animating)                   // If the animation interrupt is on, switch it off
+        if ((cycle_id >= 0) && (cycle_id <= 3)) {                   // return value will be -1 if unsuccessful
+            var cycle_info = this.#colour_cycles[cycle_id];         // Get reference for the colour cycling info  
+            if (cycle_info.on) {                                    // Don't bother if it's not on
+                if (cycle_info.animating)                           // If the animation interrupt is on, switch it off
                     clearInterval(cycle_info.animationId);
                 cycle_info.animating = false;
-                var length = this.#restore_palette.length;        // Restore display palette
-                pixel_palette = new Array(length);          // Get the display palette
+                var length = this.#restore_palette.length;          // Restore display palette
+                pixel_palette = new Array(length);                  // Get the display palette
                 for (var i = 0; i < length; i++)
                     this.pixel_palette[i] = [
                         this.#restore_palette[i][0],

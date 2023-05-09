@@ -2,9 +2,13 @@
 
 ## A Javascript and HTML5 library for emulating the bit plane screen of an Atari 16/24 bit computer.
 
-### Current version: v0.43 (2015-02-20)
+### Current version: v0.5 (2023-05-08)
 
 ## Updates
+
+### v0.5 (2023-05-08)
+
+* 8 years later (!), I've refactored the library in ES6 javascript, which, according to [CanIUse](https://caniuse.com/es6), works on 98.4% of web browsers. The original version is now in the folder `pure-js`.
 
 ### v0.43 (2015-02-20)
 
@@ -36,8 +40,8 @@
 
 ## Introduction
 
-AtariScreen implements an HTML5 emulation of the bit plane based video modes of Atari computers from the ST onwards. 
-It is designed to be used when you want to emulate some aspect of an Atari screen that cannot otherwise be easily 
+AtariScreen implements an HTML5 emulation of the bit plane based video modes of Atari computers from the ST onwards.
+It is designed to be used when you want to emulate some aspect of an Atari screen that cannot otherwise be easily
 emulated on the HTML Canvas.
 
 ## AtariScreen features
@@ -50,8 +54,10 @@ emulated on the HTML Canvas.
 
 ## Files
 
-* `AtariScreen.mini.js` - minified version of AtariScreen. This is best version to use for websites.
-* `AtariScreen.js` - the full source code for AtariScreen. Use this if you're wanting to hack around with the code.
+* `AtariScreen-es6.mini.js` - minified version of the ES6 Javascript version of AtariScreen. This is best version to use for websites.
+* `AtariScreen-es6.js` - ES6 Javascript version of AtariScreen. Use this if you're wanting to hack around with the code.
+* `pure-js/AtariScreen.mini.js` - minified version of the pure Javascript version of AtariScreen. This is best version to use for websites.
+* `pure-js/AtariScreen.js` - the full source code for the pure Javascript version of AtariScreen. Use this if you're wanting to hack around with the code.
 * `readme.html` - this file!
 * `extras/demo.js` - source code for the demo at the bottom of this page
 * `extras/main.css` - CSS file for this page
@@ -64,24 +70,24 @@ emulated on the HTML Canvas.
 
 Include AtariScreen in the `<head>` element of your web page:
 
-  ```javascript
-  <script src="AtariScreen.mini.js" language="Javascript" type="text/javascript"></script>
-  ```
+```javascript
+<script src="AtariScreen.mini.js" language="Javascript" type="text/javascript"></script>
+```
 
 In your javascript code, instantiate an AtariScreen object, passing in the screen mode, an HTML element to attach the screen to, and an ID name for the object.
 
-  ```javascript
-  // Locate "<div id="demo_placeholder" ...>" element in web page
-  var element = document.getElementById('demo_placeholder');
-  // Add an ST mode 0 screen called 'demo' to it.
-  demoScreen = new AtariScreen(0, element, 'demo');
+```javascript
+// Locate "<div id="demo_placeholder" ...>" element in web page
+var element = document.getElementById('demo_placeholder');
+// Add an ST mode 0 screen called 'demo' to it.
+demoScreen = new AtariScreen(0, element, 'demo');
 
-  // ... Any screen manipulation goes here ...
+// ... Any screen manipulation goes here ...
 
-  // Display screen.
-  demoScreen.Display();
-  ```
-  
+// Display screen.
+demoScreen.Display();
+```
+
 ---
 
 ## Methods
@@ -229,4 +235,3 @@ _Read only_ The height of the AtariScreen.
 ### ready
 
 _Read only_ Whether the screen is ready for drawing or not.
-

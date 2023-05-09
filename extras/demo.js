@@ -88,6 +88,7 @@ function load_file(evt) {
             testScreen.ExtractDegasElite(reader.result);
             testScreen.Display();
             document.getElementById('download').href = testScreen.canvas.toDataURL();
+            document.getElementById('pic-info1').innerHTML = testScreen.width + ' x ' + testScreen.height + ', ST(E) mode ' + testScreen.mode + ', ' + testScreen.palette.length + ' colours';
         };
     })(f);
     reader.readAsArrayBuffer(f);
